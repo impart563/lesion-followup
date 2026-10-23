@@ -20,4 +20,13 @@ test "root facade constructs domain values without subpackage imports" {
   }
   assert_eq(t.assessments[0].response.code(), "PD")
   assert_true(@lib.render_audit_html(t).contains("Target burden over time"))
+  assert_true(
+    @lib.render_audit_html_in(t, SimplifiedChinese).contains(
+      "靶病灶总和趋势",
+    ),
+  )
+  assert_true(@lib.preflight_track(study, [visit]).is_valid())
+  assert_true(
+    @lib.render_lesion_trends_svg(t).contains("data-state=\"measured\""),
+  )
 }

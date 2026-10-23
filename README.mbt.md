@@ -24,11 +24,53 @@ moon run --target native cmd/demo -- --scenario missing-visit --format svg
 moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --output review.html
 moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --check-input --format json
 moon run --target native cmd/demo -- --scenario nadir-boundary --bundle review-bundle
+moon run --target native cmd/demo -- --init-example new-inputs --template multi --lang zh-CN
+moon run --target native cmd/demo -- --study new-inputs/study.json --input new-inputs/followup.csv --format html --lang zh-CN --output new-inputs/review.html
 ```
 
 Open [the saved example report](examples/review.html) locally for an immediate
 preview. It contains inline CSS and SVG with no JavaScript or external assets.
 Category cards and ledger rows link to the relevant visit evidence.
+The [Chinese example report](examples/review.zh-CN.html) includes the same
+quantities and categories, translated explanations and individual-target trends.
+
+### Prepare and check inputs
+
+`--init-example NEW_DIRECTORY` creates `study.json`, `followup.csv` and filling
+instructions in `README.md`. Choose `--template single` (default) or `multi`.
+The parent directory must exist. Initialization requires a new directory and
+never merges into an existing file, directory or symlink. Both templates contain
+matched, directly runnable synthetic data. Initialization accepts only
+`--template` and `--lang` alongside its destination.
+
+`--check-input` separates parsing errors, structural errors and reader-review
+hints. Hints include omitted/explicitly missing measurements, reader limitations,
+the explicit 5.0 mm default, technique changes and persistent context gates.
+It reuses the replay engine's findings and returns no response categories.
+Structural errors carry CSV cell positions or JSON field paths. An omitted
+target uses the visit's first row as an anchor with a null field, because no
+measurement cell exists. No input is sorted, repaired or overwritten.
+
+The JSON validation envelope keeps `schema_version`, `valid`, `visit_count`,
+`diagnostics` and `input_issues`, and adds `review_hints` and source locations.
+`valid: true` means parse and structural checks passed; review hints can still be
+present. Exit status remains 0 for valid input and 2 for input errors.
+
+### Display language and individual observations
+
+`--lang en` (default) or `--lang zh-CN` selects HTML, Markdown, SVG and human CLI
+presentation, including preflight and template instructions. Machine-readable
+JSON/CSV bytes and stable codes remain language independent. Reader notes and
+identifiers are retained verbatim, escaped for the output format. Diagnostic
+summaries are translated while retaining the original detailed diagnostic.
+
+HTML and Markdown add an individual-target observation ledger. HTML also adds
+one plot per target with an independent vertical scale and labels for longest
+diameter or node short axis. A square marks the explicit 5.0 mm default; a cross
+has no diameter. A hollow marker preserves an available observation from an NE
+visit. Lines stop at NE or missing visits. These observations do not make that
+visit eligible for the sum trend or nadir. The standalone `svg` CLI format
+continues to export the sum chart.
 
 | Synthetic scenario | What it demonstrates | Ordered target categories |
 | --- | --- | --- |
@@ -45,8 +87,8 @@ artifact bytes. It replaces those named files in the selected directory.
 
 CLI exit codes are `0` for valid input (including NE or PD observations), `2` for
 arguments, parsing or structural validation errors, and `1` for I/O failures.
-`--check-input` validates schema and track structure; it does not assess clinical
-comparability or determine whether observations will be NE.
+`--check-input` validates schema and track structure and highlights review
+requirements; the reader still determines clinical comparability.
 
 ## Public API
 
@@ -89,6 +131,15 @@ The root exports `Study`, `TargetLesion`, `LesionKind`, `Visit`, `Measurement`,
 `validate_study`, `validate_track`, `replay_track`; study-JSON and follow-up-CSV
 parsers; and all public report renderers. The library uses no file or network I/O.
 The native CLI uses `moonbitlang/async@0.19.4` for file and stream access.
+
+New presentation APIs retain the original English entry points:
+`render_audit_html_in`, `render_audit_markdown_in` and `render_trajectory_svg_in`
+accept `ReportLanguage` (`English` or `SimplifiedChinese`).
+`render_lesion_trends_svg` exports the individual-target plots.
+`input_template_files` returns matched in-memory files;
+`preflight_inputs` and `preflight_track` return a `PreflightReport`, whose
+`is_valid()` checks blocking errors separately from `review_hints`.
+`render_preflight_json` and `render_preflight_markdown` format that report.
 
 `replay_track` rejects structurally invalid tracks as a whole. Successful replay
 snapshots the supplied arrays and preserves visit order. Missing or unsupported

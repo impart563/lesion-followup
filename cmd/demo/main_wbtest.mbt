@@ -21,7 +21,31 @@ test "CLI rejects incompatible or incomplete modes" {
       ["--format", "unknown"],
       ["--unknown"],
       ["--output"],
+      ["--lang", "invalid"],
+      ["--template", "multi"],
+      ["--init-example", "new", "--template", "invalid"],
+      ["--init-example", "new", "--scenario", "missing-visit"],
+      ["--init-example", "new", "--output", "report.html"],
+      ["--init-example", "new", "--format", "markdown"],
+      ["--init-example", "new", "--check-input"],
+      ["--init-example", "new", "--bundle", "bundle"],
     ] {
     assert_true(parse_args(args) is Err(_))
   }
+}
+
+///|
+test "CLI language and template modes are explicit and independent" {
+  guard parse_args([
+      "--init-example", "new", "--template", "multi", "--lang", "zh-CN",
+    ])
+    is Ok(options) else {
+    fail("template mode rejected")
+  }
+  assert_eq(options.template, "multi")
+  assert_true(options.language is SimplifiedChinese)
+  assert_true(parse_args(["--lang", "en", "--format", "json"]) is Ok(_))
+  assert_true(parse_args(["--lang", "zh-CN", "--check-input"]) is Ok(_))
+  assert_true(requested_language(["--lang", "zh-CN"]) is SimplifiedChinese)
+  assert_true(requested_language(["--lang=zh-CN"]) is SimplifiedChinese)
 }

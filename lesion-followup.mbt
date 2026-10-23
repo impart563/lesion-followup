@@ -21,6 +21,14 @@ pub using @replay {validate_study, validate_track, replay_track}
 ///|
 pub using @io {
   type Diagnostic,
+  type ReportLanguage,
+  type ReviewNotice,
+  type PreflightReport,
+  input_template_files,
+  preflight_inputs,
+  preflight_track,
+  render_preflight_json,
+  render_preflight_markdown,
   parse_diameter_mm,
   format_diameter_mm,
   parse_study_json,
@@ -30,6 +38,10 @@ pub using @io {
   render_audit_csv,
   render_trajectory_svg,
   render_audit_html,
+  render_audit_html_in,
+  render_audit_markdown_in,
+  render_trajectory_svg_in,
+  render_lesion_trends_svg,
   render_audit_manifest,
   render_validation_json,
 }

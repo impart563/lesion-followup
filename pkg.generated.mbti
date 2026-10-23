@@ -11,15 +11,23 @@ import {
 // Values
 pub fn format_diameter_mm(Int) -> String
 
+pub fn input_template_files(String, language? : @io.ReportLanguage) -> Result[Array[(String, String)], String]
+
 pub fn parse_diameter_mm(String) -> Result[Int, String]
 
 pub fn parse_followup_csv(String) -> Result[Array[@visit.Visit], Array[@io.Diagnostic]]
 
 pub fn parse_study_json(String) -> Result[@lesion.Study, Array[@io.Diagnostic]]
 
+pub fn preflight_inputs(String, String) -> @io.PreflightReport
+
+pub fn preflight_track(@lesion.Study, Array[@visit.Visit]) -> @io.PreflightReport
+
 pub fn render_audit_csv(@evidence.Trajectory) -> String
 
 pub fn render_audit_html(@evidence.Trajectory) -> String
+
+pub fn render_audit_html_in(@evidence.Trajectory, @io.ReportLanguage) -> String
 
 pub fn render_audit_json(@evidence.Trajectory) -> String
 
@@ -27,7 +35,17 @@ pub fn render_audit_manifest(@evidence.Trajectory) -> String
 
 pub fn render_audit_markdown(@evidence.Trajectory) -> String
 
+pub fn render_audit_markdown_in(@evidence.Trajectory, @io.ReportLanguage) -> String
+
+pub fn render_lesion_trends_svg(@evidence.Trajectory, language? : @io.ReportLanguage) -> String
+
+pub fn render_preflight_json(@io.PreflightReport) -> String
+
+pub fn render_preflight_markdown(@io.PreflightReport, language? : @io.ReportLanguage) -> String
+
 pub fn render_trajectory_svg(@evidence.Trajectory) -> String
+
+pub fn render_trajectory_svg_in(@evidence.Trajectory, @io.ReportLanguage) -> String
 
 pub fn render_validation_json(Array[@io.Diagnostic], Array[@evidence.InputIssue], Int) -> String
 
@@ -56,7 +74,13 @@ pub using @visit {type Measurement}
 
 pub using @visit {type Observation}
 
+pub using @io {type PreflightReport}
+
+pub using @io {type ReportLanguage}
+
 pub using @evidence {type ResolvedMeasurement}
+
+pub using @io {type ReviewNotice}
 
 pub using @lesion {type Study}
 

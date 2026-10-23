@@ -120,8 +120,45 @@ def verify_formats(outputs, expected):
     for index, a in enumerate(assessments):
         require("visit-" + str(index) in html.ids, "missing visit evidence section")
         require(a["visit_id"] in "".join(html.text), "HTML omitted visit")
+    verify_lesion_plot(outputs["html"], report)
     require("target_pd" in outputs["markdown"] if "PD" in expected else True, "Markdown omitted rule evidence")
     return report
+
+
+def verify_lesion_plot(html, report):
+    fragments = re.findall(r"<svg\b.*?</svg>", html, flags=re.S)
+    require(len(fragments) == 2, "sum and individual target plots must both be present")
+    svg = ET.fromstring(fragments[1])
+    namespace = "{http://www.w3.org/2000/svg}"
+    targets = {target["id"] for target in report["study"]["targets"]}
+    groups = [g for g in svg.findall(namespace + "g") if "data-lesion-id" in g.attrib]
+    require({g.attrib["data-lesion-id"] for g in groups} == targets, "individual target plot missing a target")
+    for group in groups:
+        lesion = group.attrib["data-lesion-id"]
+        points = {p.attrib["data-visit-id"]: p for p in group if "data-visit-id" in p.attrib}
+        require(len(points) == len(report["assessments"]), "individual plot lost an observation")
+        previous_eligible = True
+        expected_lines = 0
+        for assessment in report["assessments"]:
+            measurement = next(m for m in assessment["measurements"] if m["lesion_id"] == lesion)
+            point = points[assessment["visit_id"]]
+            state = measurement["observation"]["state"]
+            require(point.attrib["data-state"] == state, "individual plot changed the observation state")
+            require(point.attrib["data-visit-response"] == assessment["target_response"], "individual plot lost visit NE context")
+            require(point.attrib.get("data-effective-mm") == measurement["effective_mm"], "individual plot diameter differs from evidence")
+            if measurement["effective_mm"] is None:
+                require(point.tag == namespace + "path", "missing observation was plotted as a value")
+                eligible = False
+            else:
+                require(point.tag == namespace + ("rect" if state == "too_small" else "circle"), "default marker missing")
+                eligible = assessment["target_response"] != "NE"
+                if not eligible:
+                    require(point.attrib["fill"] == "#fffdf9", "NE observation must use a hollow marker")
+            if previous_eligible and eligible:
+                expected_lines += 1
+            previous_eligible = eligible
+        actual_lines = [p for p in group if p.tag == namespace + "line" and p.attrib.get("stroke-width") == "2"]
+        require(len(actual_lines) == expected_lines, "individual plot connects across an NE or missing visit")
 
 
 def main():
@@ -199,14 +236,48 @@ def main():
     require([a["sum_mm"] for a in report["assessments"]] == ["35.0", "20.0", "24.0", "25.0"], "input fixture sums changed")
     require((ROOT / "examples/review.html").read_text(encoding="utf-8") == outputs["html"], "checked-in preview is stale")
     passed("JSON profile plus CSV input, fixture arithmetic and saved HTML preview")
+    chinese_outputs = {fmt: cli(*prefix, "--format", fmt, "--lang", "zh-CN").stdout for fmt in FORMATS}
+    verify_formats(chinese_outputs, ["PR", "PR", "PR", "PD"])
+    require(chinese_outputs["json"] == outputs["json"] and chinese_outputs["csv"] == outputs["csv"], "language changed machine-readable evidence")
+    for fmt in ("html", "markdown"):
+        require("靶病灶" in chinese_outputs[fmt] and "单病灶趋势" in chinese_outputs[fmt], "Chinese report missing labels")
+        require("淋巴结短轴" in chinese_outputs[fmt], "Chinese report missing measurement axis")
+        english_html, chinese_html = ReviewHTML(), ReviewHTML()
+        if fmt == "html":
+            english_html.feed(outputs[fmt])
+            chinese_html.feed(chinese_outputs[fmt])
+            numbers = lambda parsed: re.findall(r"[-+]?\d+\.\d+(?:%)?", " ".join(parsed.text))
+            require(numbers(english_html) == numbers(chinese_html), "localization changed displayed quantities")
+    require((ROOT / "examples/review.zh-CN.html").read_text(encoding="utf-8") == chinese_outputs["html"], "Chinese preview is stale")
+    passed("Chinese and English reports preserve values, axes and machine evidence")
     require(json.loads(cli(*prefix, "--check-input", "--format", "json").stdout)["valid"], "valid input preflight failed")
-    for args in [("--format", "invalid"), ("--study", "only.json"), ("--scenario", "unknown"), ("--bundle", "b", "--format", "html"), ("--check-input", "--format", "svg")]:
+    for args in [("--format", "invalid"), ("--study", "only.json"), ("--scenario", "unknown"), ("--bundle", "b", "--format", "html"), ("--check-input", "--format", "svg"), ("--lang", "invalid"), ("--template", "multi"), ("--init-example", "new", "--check-input"), ("--init-example", "new", "--format", "html"), ("--init-example", "new", "--template", "invalid")]:
         cli(*args, expected=2)
     cli("--help")
     require(cli("--version").stdout.strip() == "lesion-followup 0.1.0", "version output changed")
     passed("CLI modes, help, version and incompatible arguments")
     with tempfile.TemporaryDirectory(prefix="lesion-followup ") as directory:
         temp = Path(directory)
+        for template, target_count in (("single", 1), ("multi", 2)):
+            generated = temp / ("输入模板 " + template)
+            cli("--init-example", str(generated), "--template", template, "--lang", "zh-CN")
+            files = {p.name: p.read_bytes() for p in generated.iterdir()}
+            require(set(files) == {"study.json", "followup.csv", "README.md"}, "template files missing or unexpected")
+            require("合成" in files["README.md"].decode("utf-8"), "Chinese filling instructions missing")
+            generated_prefix = ("--study", str(generated / "study.json"), "--input", str(generated / "followup.csv"))
+            preflight = json.loads(cli(*generated_prefix, "--check-input", "--format", "json").stdout)
+            require(preflight["valid"] and preflight["visit_count"] == 4, "generated template failed preflight")
+            generated_report = json.loads(cli(*generated_prefix, "--format", "json").stdout)
+            require(generated_report["summary"]["target_count"] == target_count, "template target count mismatch")
+            require([a["target_response"] for a in generated_report["assessments"]] == ["PR", "PR", "PR", "PD"], "template replay differs from hand calculation")
+            cli("--init-example", str(generated), expected=2)
+            require(files == {p.name: p.read_bytes() for p in generated.iterdir()}, "initialization overwrote an existing directory")
+        occupied = temp / "existing.txt"
+        occupied.write_text("preserve", encoding="utf-8")
+        cli("--init-example", str(occupied), expected=2)
+        require(occupied.read_text(encoding="utf-8") == "preserve", "initialization overwrote an existing file")
+        cli("--init-example", str(temp / "no-parent" / "child"), expected=1)
+        passed("single and multi template initialization, Unicode paths and overwrite protection")
         bundle = temp / "review bundle"
         cli(*prefix, "--bundle", str(bundle))
         first_files = {p.name: p.read_bytes() for p in bundle.iterdir()}
@@ -221,12 +292,42 @@ def main():
         target = temp / "direct.html"
         cli(*prefix, "--format", "html", "--output", str(target))
         require(target.read_text(encoding="utf-8") == outputs["html"], "file output mismatch")
+        chinese_bundle = temp / "中文报告包"
+        cli(*prefix, "--bundle", str(chinese_bundle), "--lang", "zh-CN")
+        require((chinese_bundle / "report.html").read_text(encoding="utf-8") == chinese_outputs["html"], "Chinese bundle differs from direct HTML")
+        require((chinese_bundle / "audit.json").read_bytes() == (bundle / "audit.json").read_bytes(), "bundle language changed JSON")
         passed("deterministic review bundles, manifest and direct file output")
         study_path = temp / "study.json"
         csv_path = temp / "input.csv"
         study_text = (ROOT / "examples/study.json").read_text(encoding="utf-8")
         csv_text = (ROOT / "examples/followup.csv").read_text(encoding="utf-8")
         study_path.write_text(study_text, encoding="utf-8")
+        quality_text = (
+            "visit_id,date,technique_id,lesion_id,state,diameter_mm,note\r\n"
+            'v1,2026-01-02,ct-venous-5mm,T1,not_evaluable,,"line 1\r\nline 2"\r\n'
+            "v2,2026-02-30,ct-venous-5mm,T1,measured,20.0,\r\n"
+        )
+        csv_path.write_bytes(quality_text.encode("utf-8"))
+        quality_prefix = ("--study", str(study_path), "--input", str(csv_path))
+        quality = json.loads(cli(*quality_prefix, "--check-input", "--format", "json", expected=2).stdout)
+        date_issue = next(i for i in quality["input_issues"] if i["code"] == "invalid_date")
+        require((date_issue["line"], date_issue["column"], date_issue["field"]) == (4, 4, "date"), "structural CSV issue lost its physical location")
+        csv_path.write_text("visit_id,date,technique_id,lesion_id,state,diameter_mm,note\nv1,2026-01-02,changed,N1,too_small,,\n", encoding="utf-8")
+        before_preflight = (study_path.read_bytes(), csv_path.read_bytes())
+        quality = json.loads(cli(*quality_prefix, "--check-input", "--format", "json").stdout)
+        require(quality["valid"] and len(quality["review_hints"]) == 3, "valid review-required input was rejected or missed hints")
+        omitted = next(i for i in quality["review_hints"] if i["code"] == "missing_measurement")
+        require(omitted["field"] is None and omitted["line"] == 2, "omitted target should use a visit anchor, not a fabricated field")
+        require("人工复核提示" in cli(*quality_prefix, "--check-input", "--lang", "zh-CN").stdout, "Chinese preflight missing")
+        require(before_preflight == (study_path.read_bytes(), csv_path.read_bytes()), "preflight changed source files")
+        quality_report = json.loads(cli(*quality_prefix, "--format", "json").stdout)
+        quality_html = cli(*quality_prefix, "--format", "html", "--lang", "zh-CN").stdout
+        verify_lesion_plot(quality_html, quality_report)
+        study_path.write_text(study_text.replace('"30.0"', '"9.9"'), encoding="utf-8")
+        invalid_profile = json.loads(cli(*quality_prefix, "--check-input", "--format", "json", expected=2).stdout)
+        require(invalid_profile["input_issues"][0]["field"] == "$.targets[0].baseline_mm", "JSON structural field path missing")
+        study_path.write_text(study_text, encoding="utf-8")
+        passed("quality preflight distinguishes errors and review hints with physical source locations")
         csv_path.write_text(csv_text.replace("20.0,", "20.01,", 1), encoding="utf-8")
         temp_prefix = ("--study", str(study_path), "--input", str(csv_path))
         invalid = json.loads(cli(*temp_prefix, "--check-input", "--format", "json", expected=2).stdout)
@@ -251,6 +352,8 @@ def main():
         unsafe_outputs = {fmt: cli(*temp_prefix, "--format", fmt).stdout for fmt in FORMATS}
         verify_formats(unsafe_outputs, ["NE"])
         require("<script>" not in unsafe_outputs["html"], "HTML injection")
+        chinese_unsafe = cli(*temp_prefix, "--format", "html", "--lang", "zh-CN").stdout
+        require("<script>" not in chinese_unsafe and "&lt;script&gt;alert(1)&lt;/script&gt;" in chinese_unsafe, "Chinese report lost safe reader notes")
         data_rows = list(csv.DictReader(io.StringIO(unsafe_outputs["csv"])))
         require(any(row["message"] == malicious for row in data_rows), "CSV lost a quoted multiline note")
         passed("untrusted text escaping and multiline CSV round trip")
