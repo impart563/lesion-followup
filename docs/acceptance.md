@@ -15,6 +15,7 @@ moon fmt
 moon info
 moon -C examples/downstream-consumer info
 moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --output examples/review.html
+moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --lang zh-CN --output examples/review.zh-CN.html
 python scripts/acceptance.py --record docs/acceptance-results.json
 ```
 
@@ -46,6 +47,9 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Visualization | SVG XML parsing, exclusion of NE points, HTML IDs/links and script/resource checks |
 | File workflow | Direct output, repeatable five-file bundles, manifest consistency, source input protection and failure exit codes |
 | Distribution | Formatting, warning-free compilation/tests, native build, stable generated interfaces and Mooncakes package contents |
+| Input preparation | Directly runnable single/multi templates, Unicode paths and rejection of existing destinations |
+| Quality preflight | Review hints separated from errors, physical multiline CSV positions, JSON structural paths and unchanged input bytes |
+| Language and target plots | Matching bilingual quantities and machine formats, individually checked observation values, NE markers and connecting-line gaps |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
@@ -65,3 +69,15 @@ The saved example HTML has also been inspected in a browser, including category
 card navigation to the corresponding visit evidence. All numeric scenarios and
 input fixtures are synthetic. This is software acceptance, not clinical,
 regulatory, imaging-reader or diagnostic validation.
+
+## Input and report usability preview
+
+On 2026-10-24, the saved Chinese example was opened through localhost in the
+Codex in-app browser. At a 1265 × 712 viewport, the Chinese headings, target-only
+scope, category cards, sum chart and ledger were readable. Selecting the PD card
+navigated to `#visit-3`, showing week-8's 25.0 mm sum evidence, with T1 at 15.0 mm
+and N1 at 10.0 mm. Scrolling showed separate T1 longest-diameter and N1 short-axis
+plots and the observation ledger, without clipped headings or overlapping plots.
+This preview checks presentation and navigation. Marker values, missing-value
+gaps, defaults and hollow NE markers are checked against audit JSON by the
+acceptance script and the MoonBit observation-state tests.
