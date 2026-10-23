@@ -22,6 +22,18 @@ the standard `~/.moon/bin` installation. Build tools required by MoonBit's nativ
 target must be installed. The library targets wasm, wasm-gc, JavaScript and
 native; filesystem CLI tests run only on native.
 
+The verified compiler release is `0.10.14+7d59c7ec9` (Moon CLI
+`0.1.20260920`). CI pins both the compiler tools and matching core library to
+this release through the official installer's `MOONBIT_INSTALL_VERSION`.
+On Linux or macOS, install the same release with:
+
+```sh
+curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- '0.10.14+7d59c7ec9'
+```
+
+When upgrading MoonBit, review formatter and public-interface changes and rerun
+the complete acceptance script before updating the CI pin and saved result.
+
 | Area | Evidence |
 | --- | --- |
 | Medical arithmetic | Assertion tests for inclusive PR/PD thresholds, PD's dual condition, baseline/nadir distinction, node short axis, incomplete data and context gates |
