@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "impart563/lesion-followup/io"
+
+import {
+  "impart563/lesion-followup/lesion",
+  "impart563/lesion-followup/visit",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn format_diameter_mm(Int) -> String
+
+pub fn parse_diameter_mm(String) -> Result[Int, String]
+
+pub fn parse_followup_csv(String) -> Result[Array[@visit.Visit], Array[Diagnostic]]
+
+pub fn parse_study_json(String) -> Result[@lesion.Study, Array[Diagnostic]]
+
+// Errors
+
+// Types and methods
+pub(all) struct Diagnostic {
+  code : String
+  message : String
+  line : Int?
+  column : Int?
+  field : String?
+} derive(Eq, @debug.Debug)
+pub fn Diagnostic::equal(Self, Self) -> Bool
+pub fn Diagnostic::not_equal(Self, Self) -> Bool
+pub fn Diagnostic::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

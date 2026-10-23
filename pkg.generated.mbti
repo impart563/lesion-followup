@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "impart563/lesion-followup"
+
+import {
+  "impart563/lesion-followup/evidence",
+  "impart563/lesion-followup/io",
+  "impart563/lesion-followup/lesion",
+  "impart563/lesion-followup/visit",
+}
+
+// Values
+pub fn format_diameter_mm(Int) -> String
+
+pub fn parse_diameter_mm(String) -> Result[Int, String]
+
+pub fn parse_followup_csv(String) -> Result[Array[@visit.Visit], Array[@io.Diagnostic]]
+
+pub fn parse_study_json(String) -> Result[@lesion.Study, Array[@io.Diagnostic]]
+
+pub fn replay_track(@lesion.Study, Array[@visit.Visit]) -> Result[@evidence.Trajectory, Array[@evidence.InputIssue]]
+
+pub fn validate_study(@lesion.Study) -> Array[@evidence.InputIssue]
+
+pub fn validate_track(@lesion.Study, Array[@visit.Visit]) -> Array[@evidence.InputIssue]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @io {type Diagnostic}
+
+pub using @evidence {type Finding}
+
+pub using @evidence {type InputIssue}
+
+pub using @evidence {type IssueCode}
+
+pub using @lesion {type LesionKind}
+
+pub using @visit {type Measurement}
+
+pub using @visit {type Observation}
+
+pub using @evidence {type ResolvedMeasurement}
+
+pub using @lesion {type Study}
+
+pub using @lesion {type TargetLesion}
+
+pub using @evidence {type TargetResponse}
+
+pub using @evidence {type Trajectory}
+
+pub using @visit {type Visit}
+
+pub using @evidence {type VisitAssessment}
+
+// Traits

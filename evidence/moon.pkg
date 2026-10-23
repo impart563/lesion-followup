@@ -1,0 +1,5 @@
+import {
+  "moonbitlang/core/debug",
+  "impart563/lesion-followup/lesion",
+  "impart563/lesion-followup/visit",
+}

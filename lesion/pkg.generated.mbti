@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "impart563/lesion-followup/lesion"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum LesionKind {
+  NonNodal
+  LymphNode
+} derive(Eq, @debug.Debug)
+pub fn LesionKind::equal(Self, Self) -> Bool
+pub fn LesionKind::not_equal(Self, Self) -> Bool
+pub fn LesionKind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Study {
+  id : String
+  baseline_date : String
+  technique_id : String
+  slice_thickness_tenths_mm : Int
+  targets : Array[TargetLesion]
+} derive(Eq, @debug.Debug)
+pub fn Study::equal(Self, Self) -> Bool
+pub fn Study::not_equal(Self, Self) -> Bool
+pub fn Study::to_repr(Self) -> @debug.Repr
+
+pub(all) struct TargetLesion {
+  id : String
+  organ : String
+  kind : LesionKind
+  baseline_tenths_mm : Int
+} derive(Eq, @debug.Debug)
+pub fn TargetLesion::equal(Self, Self) -> Bool
+pub fn TargetLesion::not_equal(Self, Self) -> Bool
+pub fn TargetLesion::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

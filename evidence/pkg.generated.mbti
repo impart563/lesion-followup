@@ -1,0 +1,101 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "impart563/lesion-followup/evidence"
+
+import {
+  "impart563/lesion-followup/lesion",
+  "impart563/lesion-followup/visit",
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct Finding {
+  code : String
+  lesion_id : String?
+  message : String
+} derive(Eq, @debug.Debug)
+pub fn Finding::equal(Self, Self) -> Bool
+pub fn Finding::not_equal(Self, Self) -> Bool
+pub fn Finding::to_repr(Self) -> @debug.Repr
+
+pub(all) struct InputIssue {
+  code : IssueCode
+  message : String
+  visit_id : String?
+  lesion_id : String?
+} derive(Eq, @debug.Debug)
+pub fn InputIssue::equal(Self, Self) -> Bool
+pub fn InputIssue::not_equal(Self, Self) -> Bool
+pub fn InputIssue::to_repr(Self) -> @debug.Repr
+
+pub(all) enum IssueCode {
+  InvalidStudy
+  InvalidDate
+  InvalidTarget
+  DuplicateId
+  TooManyTargets
+  TooManyPerOrgan
+  InvalidMeasurement
+  UnknownTarget
+  InvalidVisitOrder
+} derive(Eq, @debug.Debug)
+pub fn IssueCode::code(Self) -> String
+pub fn IssueCode::equal(Self, Self) -> Bool
+pub fn IssueCode::not_equal(Self, Self) -> Bool
+pub fn IssueCode::to_repr(Self) -> @debug.Repr
+
+pub(all) struct ResolvedMeasurement {
+  lesion_id : String
+  kind : @lesion.LesionKind
+  baseline_tenths_mm : Int
+  observation : @visit.Observation
+  effective_tenths_mm : Int?
+} derive(Eq, @debug.Debug)
+pub fn ResolvedMeasurement::equal(Self, Self) -> Bool
+pub fn ResolvedMeasurement::not_equal(Self, Self) -> Bool
+pub fn ResolvedMeasurement::to_repr(Self) -> @debug.Repr
+
+pub(all) enum TargetResponse {
+  CR
+  PR
+  SD
+  PD
+  NE
+} derive(Eq, @debug.Debug)
+pub fn TargetResponse::code(Self) -> String
+pub fn TargetResponse::equal(Self, Self) -> Bool
+pub fn TargetResponse::not_equal(Self, Self) -> Bool
+pub fn TargetResponse::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Trajectory {
+  study : @lesion.Study
+  visits : Array[@visit.Visit]
+  assessments : Array[VisitAssessment]
+} derive(Eq, @debug.Debug)
+pub fn Trajectory::equal(Self, Self) -> Bool
+pub fn Trajectory::not_equal(Self, Self) -> Bool
+pub fn Trajectory::to_repr(Self) -> @debug.Repr
+
+pub(all) struct VisitAssessment {
+  visit_id : String
+  date : String
+  response : TargetResponse
+  sum_tenths_mm : Int?
+  baseline_sum_tenths_mm : Int
+  nadir_sum_tenths_mm : Int
+  nadir_visit_id : String
+  baseline_change_basis_points : Int?
+  nadir_change_basis_points : Int?
+  measurements : Array[ResolvedMeasurement]
+  findings : Array[Finding]
+} derive(Eq, @debug.Debug)
+pub fn VisitAssessment::equal(Self, Self) -> Bool
+pub fn VisitAssessment::not_equal(Self, Self) -> Bool
+pub fn VisitAssessment::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

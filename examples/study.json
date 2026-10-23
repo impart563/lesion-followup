@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "study_id": "synthetic-target-followup",
+  "baseline_date": "2026-01-01",
+  "technique_id": "ct-venous-5mm",
+  "slice_thickness_mm": "5.0",
+  "targets": [
+    {"id": "T1", "organ": "liver", "kind": "non_nodal", "baseline_mm": "30.0"},
+    {"id": "N1", "organ": "lymph_nodes", "kind": "lymph_node", "baseline_mm": "20.0"}
+  ]
+}
