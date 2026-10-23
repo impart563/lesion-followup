@@ -287,3 +287,30 @@ test "full software range is safe and replay is deterministic" {
   assert_eq(a.assessments[0].baseline_change_basis_points, Some(-10000))
   assert_eq(a, run(s, [v]))
 }
+
+///|
+test "input arrays are snapshotted before reports are constructed" {
+  let s = study(200)
+  let v = visit("v", "02", Measured(200))
+  let visits = [v]
+  let t = run(s, visits)
+  s.targets.clear()
+  v.measurements.clear()
+  visits.clear()
+  assert_eq(t.study.targets.length(), 1)
+  assert_eq(t.visits[0].measurements.length(), 1)
+  assert_eq(t.assessments[0].sum_tenths_mm, Some(200))
+}
+
+///|
+test "loss of prior PR threshold needs confirmation context rather than declaring SD" {
+  let t = run(study(1000), [
+    visit("pr", "02", Measured(700)),
+    visit("rebound", "03", Measured(750)),
+  ])
+  assert_eq(t.assessments[0].response.code(), "PR")
+  assert_eq(t.assessments[1].response.code(), "NE")
+  assert_true(
+    t.assessments[1].findings.any(f => f.code == "prior_pr_context_required"),
+  )
+}

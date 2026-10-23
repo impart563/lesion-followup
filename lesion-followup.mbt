@@ -25,4 +25,11 @@ pub using @io {
   format_diameter_mm,
   parse_study_json,
   parse_followup_csv,
+  render_audit_json,
+  render_audit_markdown,
+  render_audit_csv,
+  render_trajectory_svg,
+  render_audit_html,
+  render_audit_manifest,
+  render_validation_json,
 }

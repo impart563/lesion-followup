@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/core/argparse",
+  "moonbitlang/core/env",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/stdio",
+  "impart563/lesion-followup" @lib,
+  "impart563/lesion-followup/cmd/demo/scenarios",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "+native"

@@ -5,3 +5,7 @@ import {
   "impart563/lesion-followup/replay",
   "impart563/lesion-followup/io",
 }
+
+import {
+  "impart563/lesion-followup" @lib,
+} for "test"

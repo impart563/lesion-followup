@@ -17,6 +17,20 @@ pub fn parse_followup_csv(String) -> Result[Array[@visit.Visit], Array[@io.Diagn
 
 pub fn parse_study_json(String) -> Result[@lesion.Study, Array[@io.Diagnostic]]
 
+pub fn render_audit_csv(@evidence.Trajectory) -> String
+
+pub fn render_audit_html(@evidence.Trajectory) -> String
+
+pub fn render_audit_json(@evidence.Trajectory) -> String
+
+pub fn render_audit_manifest(@evidence.Trajectory) -> String
+
+pub fn render_audit_markdown(@evidence.Trajectory) -> String
+
+pub fn render_trajectory_svg(@evidence.Trajectory) -> String
+
+pub fn render_validation_json(Array[@io.Diagnostic], Array[@evidence.InputIssue], Int) -> String
+
 pub fn replay_track(@lesion.Study, Array[@visit.Visit]) -> Result[@evidence.Trajectory, Array[@evidence.InputIssue]]
 
 pub fn validate_study(@lesion.Study) -> Array[@evidence.InputIssue]

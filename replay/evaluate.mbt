@@ -38,6 +38,7 @@ pub fn replay_track(
   let mut nadir = baseline_sum
   let mut nadir_id = "baseline"
   let mut had_cr = false
+  let mut had_pr = false
   let mut stop_reason : String? = None
   let assessments : Array[@evidence.VisitAssessment] = []
   for visit in visits {
@@ -158,6 +159,11 @@ pub fn replay_track(
         ),
       )
       PR
+    } else if had_pr {
+      let reason = "Prior target PR no longer meets the baseline shrinkage threshold, without target PD. Confirmation/persistence context is outside this release."
+      findings.push(finding("prior_pr_context_required", reason))
+      stop_reason = Some(reason)
+      NE
     } else {
       findings.push(
         finding(
@@ -198,6 +204,9 @@ pub fn replay_track(
     }
     if response == CR {
       had_cr = true
+    }
+    if response == PR {
+      had_pr = true
     }
   }
   Ok({ study, visits, assessments, })

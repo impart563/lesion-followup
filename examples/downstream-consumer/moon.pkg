@@ -1,0 +1,2 @@
+import { "impart563/lesion-followup" @lib }
+pkgtype(kind: "executable")
