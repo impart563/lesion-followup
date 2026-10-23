@@ -3,6 +3,7 @@
 Run from the repository root:
 
 ```sh
+moon update
 python scripts/acceptance.py
 ```
 
@@ -33,6 +34,8 @@ curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- '0.10.14+7d5
 
 When upgrading MoonBit, review formatter and public-interface changes and rerun
 the complete acceptance script before updating the CI pin and saved result.
+Fresh installations need `moon update` once before running checks so that the
+registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 
 | Area | Evidence |
 | --- | --- |

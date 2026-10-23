@@ -1,9 +1,9 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-23T21:07:32.528624+00:00",
+  "checked_at_utc": "2026-10-23T21:08:51.621380+00:00",
   "module": "impart563/lesion-followup@0.1.0",
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "418400bd2eb0d861b2f9918dfa1da4c9b81952144e494d2bc8c89f93e42cc7f7",
+  "source_sha256": "a03d4090e70eac71c1a0bc1aaaad624486601069c69836b2b8dbe3a75b1e9cc9",
   "source_file_count": 62,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
