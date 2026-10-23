@@ -1,0 +1,433 @@
+{
+  "status": "passed",
+  "checked_at_utc": "2026-10-23T18:26:21.791623+00:00",
+  "module": "impart563/lesion-followup@0.1.0",
+  "scope": "software acceptance using synthetic data; not clinical validation",
+  "source_sha256": "f9f93647391ea295782248a0e2d04672fdb4b72b7955d2a577ac8d5f96c19556",
+  "source_file_count": 62,
+  "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
+  "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
+  "python_version": "3.8.7",
+  "unit_tests": {
+    "wasm": {
+      "total": 29,
+      "passed": 29,
+      "failed": 0
+    },
+    "wasm-gc": {
+      "total": 29,
+      "passed": 29,
+      "failed": 0
+    },
+    "js": {
+      "total": 29,
+      "passed": 29,
+      "failed": 0
+    },
+    "native": {
+      "total": 31,
+      "passed": 31,
+      "failed": 0
+    }
+  },
+  "workflow_checks": [
+    "format, warning-free checks, native build, four-target tests and public interfaces",
+    "public quickstart and separate downstream module",
+    "nadir-boundary: five formats, repeatability and matching evidence",
+    "node-resolution: five formats, repeatability and matching evidence",
+    "missing-visit: five formats, repeatability and matching evidence",
+    "JSON profile plus CSV input, fixture arithmetic and saved HTML preview",
+    "CLI modes, help, version and incompatible arguments",
+    "deterministic review bundles, manifest and direct file output",
+    "structured input errors, no partial report, source protection and I/O failures",
+    "untrusted text escaping and multiline CSV round trip",
+    "package archive and synchronized tested README"
+  ],
+  "scenario_summaries": {
+    "nadir-boundary": {
+      "target_count": 1,
+      "visit_count": 3,
+      "response_counts": {
+        "CR": 0,
+        "PR": 2,
+        "SD": 0,
+        "PD": 1,
+        "NE": 0
+      },
+      "missing_measurements": 0,
+      "defaulted_measurements": 0
+    },
+    "node-resolution": {
+      "target_count": 1,
+      "visit_count": 3,
+      "response_counts": {
+        "CR": 1,
+        "PR": 1,
+        "SD": 0,
+        "PD": 0,
+        "NE": 1
+      },
+      "missing_measurements": 0,
+      "defaulted_measurements": 0
+    },
+    "missing-visit": {
+      "target_count": 1,
+      "visit_count": 4,
+      "response_counts": {
+        "CR": 0,
+        "PR": 2,
+        "SD": 0,
+        "PD": 1,
+        "NE": 1
+      },
+      "missing_measurements": 1,
+      "defaulted_measurements": 0
+    }
+  },
+  "file_input_summary": {
+    "target_count": 2,
+    "visit_count": 4,
+    "response_counts": {
+      "CR": 0,
+      "PR": 3,
+      "SD": 0,
+      "PD": 1,
+      "NE": 0
+    },
+    "missing_measurements": 0,
+    "defaulted_measurements": 0
+  },
+  "command_count": 66,
+  "commands": [
+    {
+      "command": "moon version --all",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon fmt --check",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon check --target all --deny-warn",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon build --target native --deny-warn",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon test --target all --deny-warn",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon info",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native examples/quickstart",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native .",
+      "cwd": "examples/downstream-consumer",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario nadir-boundary --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario node-resolution --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario missing-visit --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --format invalid",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study only.json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --scenario unknown",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --bundle b --format html",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --check-input --format svg",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --help",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --version",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --bundle <temporary>/review bundle",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --bundle <temporary>/review bundle",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --output <temporary>/direct.html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format html --output <temporary>/direct.html",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format json --output <temporary>/input.csv",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format json --output <temporary>/study.json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --output <temporary>/report.html",
+      "cwd": ".",
+      "exit_code": 1
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/absent.csv",
+      "cwd": ".",
+      "exit_code": 1
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/input.csv --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon package",
+      "cwd": ".",
+      "exit_code": 0
+    }
+  ]
+}
