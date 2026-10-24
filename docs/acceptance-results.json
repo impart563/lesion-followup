@@ -1,32 +1,32 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-24T18:11:31.835133+00:00",
+  "checked_at_utc": "2026-10-24T20:13:12.756071+00:00",
   "module": "impart563/lesion-followup@0.1.0",
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "67a91a12f581446b7ebb26c871f1d36e268850595cf349f700d373be0e2bffe4",
-  "source_file_count": 91,
+  "source_sha256": "1781b41f5e2803615d32e44aa7e4ae2161b1b52c022e2988cdc1ba7f193e200d",
+  "source_file_count": 98,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
   "unit_tests": {
     "wasm": {
-      "total": 49,
-      "passed": 49,
+      "total": 52,
+      "passed": 52,
       "failed": 0
     },
     "wasm-gc": {
-      "total": 49,
-      "passed": 49,
+      "total": 52,
+      "passed": 52,
       "failed": 0
     },
     "js": {
-      "total": 49,
-      "passed": 49,
+      "total": 52,
+      "passed": 52,
       "failed": 0
     },
     "native": {
-      "total": 53,
-      "passed": 53,
+      "total": 56,
+      "passed": 56,
       "failed": 0
     }
   },
@@ -35,7 +35,21 @@
     "request_count": 61,
     "native_parity_cases": 17,
     "build": "python scripts/build_browser.py",
-    "module": "_build/browser/browser.js"
+    "module": "_build/browser/browser.js",
+    "workbench": {
+      "checks": [
+        "table import/export preserves all five native CLI reports",
+        "measurement edits replay the nadir; editable precision errors still block reports",
+        "MoonBit decodes quoted BOM/CRLF/Unicode CSV; missing observations and notes survive",
+        "structural values remain editable while malformed table shapes are rejected",
+        "strict draft containers preserve unfinished text and reject corrupt or incompatible versions",
+        "two print layouts link to complete escaped evidence and share an independently verified input hash",
+        "36-visit print fixtures include long Unicode notes and NE without changing clinical values",
+        "workbench uses local assets, blocks network connections and previews print content without navigation"
+      ],
+      "print_fixture_visits": 36,
+      "print_fixture_observations": 72
+    }
   },
   "workflow_checks": [
     "format, warning-free checks, native build, four-target tests and public interfaces",
@@ -56,6 +70,8 @@
     "untrusted text escaping and multiline CSV round trip",
     "browser ES module exports, versioned contracts, templates and independent calls",
     "browser/native parity: bilingual five-format reports, exact boundaries, NE gates and located errors",
+    "workbench table edits, exact CSV round trips and strict unfinished draft contracts",
+    "summary/full print evidence, independent input hashes, long-track fixtures and offline assets",
     "package archive and synchronized tested README"
   ],
   "scenario_summaries": {
