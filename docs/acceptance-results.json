@@ -1,32 +1,32 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-23T22:27:35.582482+00:00",
+  "checked_at_utc": "2026-10-24T03:02:07.798792+00:00",
   "module": "impart563/lesion-followup@0.1.0",
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "0b705405a052fcb30d55b3cc0ef8e9f1873a17c0bd3cc0c8e6f8995d3b4a28d9",
-  "source_file_count": 67,
+  "source_sha256": "5b6ccbdc6a0b5d6d5f93881f90824ddff29e690caa5c15b8c110a394ffaed465",
+  "source_file_count": 81,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
   "unit_tests": {
     "wasm": {
-      "total": 35,
-      "passed": 35,
+      "total": 43,
+      "passed": 43,
       "failed": 0
     },
     "wasm-gc": {
-      "total": 35,
-      "passed": 35,
+      "total": 43,
+      "passed": 43,
       "failed": 0
     },
     "js": {
-      "total": 35,
-      "passed": 35,
+      "total": 43,
+      "passed": 43,
       "failed": 0
     },
     "native": {
-      "total": 38,
-      "passed": 38,
+      "total": 47,
+      "passed": 47,
       "failed": 0
     }
   },
@@ -41,6 +41,9 @@
     "CLI modes, help, version and incompatible arguments",
     "single and multi template initialization, Unicode paths and overwrite protection",
     "deterministic review bundles, manifest and direct file output",
+    "bundle tampering, missing files, metadata and unsupported-version rejection",
+    "revision identity alignment, empty diffs, downstream nadir effects and source protection",
+    "batch relative paths, isolated failures, matching outputs, portable IDs and non-overwrite",
     "quality preflight distinguishes errors and review hints with physical source locations",
     "structured input errors, no partial report, source protection and I/O failures",
     "untrusted text escaping and multiline CSV round trip",
@@ -100,7 +103,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 94,
+  "command_count": 111,
   "commands": [
     {
       "command": "moon version --all",
@@ -468,12 +471,97 @@
       "exit_code": 0
     },
     {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
       "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --output <temporary>/direct.html",
       "cwd": ".",
       "exit_code": 0
     },
     {
       "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --bundle <temporary>/中文报告包 --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --format json",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/review bundle --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --output examples/followup.csv",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --batch <temporary>/batch.json --bundle <temporary>/批量输出 --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 3
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/case-001 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --batch <temporary>/batch.json --bundle <temporary>/批量输出",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --batch <temporary>/batch.json --bundle <temporary>/rejected-batch",
+      "cwd": ".",
+      "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --batch examples/batch.json --bundle <temporary>/complete-batch",
       "cwd": ".",
       "exit_code": 0
     },

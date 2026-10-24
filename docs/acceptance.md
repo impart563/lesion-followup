@@ -16,6 +16,7 @@ moon info
 moon -C examples/downstream-consumer info
 moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --output examples/review.html
 moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --format html --lang zh-CN --output examples/review.zh-CN.html
+moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --format html --lang zh-CN --output examples/revision.zh-CN.html
 python scripts/acceptance.py --record docs/acceptance-results.json
 ```
 
@@ -50,6 +51,10 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Input preparation | Directly runnable single/multi templates, Unicode paths and rejection of existing destinations |
 | Quality preflight | Review hints separated from errors, physical multiline CSV positions, JSON structural paths and unchanged input bytes |
 | Language and target plots | Matching bilingual quantities and machine formats, individually checked observation values, NE markers and connecting-line gaps |
+| Calculation trace | Exact operands checked against audit values, inactive branches, missing operands and NE gate evidence |
+| Revisions | Measurement alignment, same-input empty differences, visit additions/removals, baseline rejection and downstream nadir/category effects |
+| Bundle provenance | Independent Python hashlib comparison, raw-file fingerprints, byte lengths, tampering/missing files/profile/version rejection and read-only verification |
+| Batch workflow | Manifest-relative paths, partial input/I/O failure isolation, matching per-case results, portable IDs and rejection of existing output roots |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
@@ -81,3 +86,9 @@ plots and the observation ledger, without clipped headings or overlapping plots.
 This preview checks presentation and navigation. Marker values, missing-value
 gaps, defaults and hollow NE markers are checked against audit JSON by the
 acceptance script and the MoonBit observation-state tests.
+
+On 2026-10-24 the Chinese revision example was also previewed in the same
+browser. It displayed one changed observation, three affected visits, week-6
+PR→PD and week-8 PD→NE, with readable before/after measurement and minimum
+columns. Both revisions use synthetic inputs. Calculation-condition tables
+retain the existing report's visit navigation and target-only scope.
