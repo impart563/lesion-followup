@@ -21,6 +21,17 @@ pub fn Finding::equal(Self, Self) -> Bool
 pub fn Finding::not_equal(Self, Self) -> Bool
 pub fn Finding::to_repr(Self) -> @debug.Repr
 
+pub(all) struct InputChange {
+  visit_id : String
+  lesion_id : String?
+  field : String
+  before : String?
+  after : String?
+} derive(Eq, @debug.Debug)
+pub fn InputChange::equal(Self, Self) -> Bool
+pub fn InputChange::not_equal(Self, Self) -> Bool
+pub fn InputChange::to_repr(Self) -> @debug.Repr
+
 pub(all) struct InputIssue {
   code : IssueCode
   message : String
@@ -58,6 +69,19 @@ pub fn ResolvedMeasurement::equal(Self, Self) -> Bool
 pub fn ResolvedMeasurement::not_equal(Self, Self) -> Bool
 pub fn ResolvedMeasurement::to_repr(Self) -> @debug.Repr
 
+pub(all) struct RuleCheck {
+  code : String
+  lesion_id : String?
+  left : Int?
+  operator : String
+  right : Int
+  passed : Bool?
+  active : Bool
+} derive(Eq, @debug.Debug)
+pub fn RuleCheck::equal(Self, Self) -> Bool
+pub fn RuleCheck::not_equal(Self, Self) -> Bool
+pub fn RuleCheck::to_repr(Self) -> @debug.Repr
+
 pub(all) enum TargetResponse {
   CR
   PR
@@ -69,6 +93,15 @@ pub fn TargetResponse::code(Self) -> String
 pub fn TargetResponse::equal(Self, Self) -> Bool
 pub fn TargetResponse::not_equal(Self, Self) -> Bool
 pub fn TargetResponse::to_repr(Self) -> @debug.Repr
+
+pub(all) struct TrackRevision {
+  study_id : String
+  changes : Array[InputChange]
+  impacts : Array[VisitImpact]
+} derive(Eq, @debug.Debug)
+pub fn TrackRevision::equal(Self, Self) -> Bool
+pub fn TrackRevision::not_equal(Self, Self) -> Bool
+pub fn TrackRevision::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Trajectory {
   study : @lesion.Study
@@ -95,6 +128,15 @@ pub(all) struct VisitAssessment {
 pub fn VisitAssessment::equal(Self, Self) -> Bool
 pub fn VisitAssessment::not_equal(Self, Self) -> Bool
 pub fn VisitAssessment::to_repr(Self) -> @debug.Repr
+
+pub(all) struct VisitImpact {
+  visit_id : String
+  before : VisitAssessment?
+  after : VisitAssessment?
+} derive(Eq, @debug.Debug)
+pub fn VisitImpact::equal(Self, Self) -> Bool
+pub fn VisitImpact::not_equal(Self, Self) -> Bool
+pub fn VisitImpact::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

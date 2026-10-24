@@ -111,6 +111,7 @@ pub fn render_audit_markdown_in(
         "\n",
       )
     }
+    out.write_string(trace_markdown(a, language))
   }
   out.write_string(
     render_lesion_section_markdown(trajectory, language) +

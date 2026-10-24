@@ -124,7 +124,7 @@ pub fn render_audit_html_in(
         "</td></tr>",
       )
     }
-    out.write_string("</tbody></table></div>")
+    out.write_string("</tbody></table></div>" + trace_html(a, language))
     for f in a.findings {
       let target = match f.lesion_id {
         Some(id) => " · " + html_escape(id)

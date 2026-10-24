@@ -13,10 +13,19 @@ pub using @evidence {
   type Finding,
   type VisitAssessment,
   type Trajectory,
+  type RuleCheck,
+  type InputChange,
+  type VisitImpact,
+  type TrackRevision,
 }
 
 ///|
-pub using @replay {validate_study, validate_track, replay_track}
+pub using @replay {
+  validate_study,
+  validate_track,
+  replay_track,
+  explain_assessment,
+}
 
 ///|
 pub using @io {
@@ -24,6 +33,19 @@ pub using @io {
   type ReportLanguage,
   type ReviewNotice,
   type PreflightReport,
+  compare_tracks,
+  render_revision_json,
+  render_revision_markdown,
+  render_revision_html,
+  sha256_hex,
+  review_artifacts,
+  render_bundle_manifest,
+  verify_bundle,
+  type BatchCase,
+  type BatchResult,
+  parse_batch_json,
+  render_batch_index_json,
+  render_batch_index_html,
   input_template_files,
   preflight_inputs,
   preflight_track,

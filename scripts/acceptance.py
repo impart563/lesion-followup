@@ -120,6 +120,18 @@ def verify_formats(outputs, expected):
     for index, a in enumerate(assessments):
         require("visit-" + str(index) in html.ids, "missing visit evidence section")
         require(a["visit_id"] in "".join(html.text), "HTML omitted visit")
+        checks = {c["code"]: c for c in a["rule_checks"]}
+        size = None if a["sum_mm"] is None else int(a["sum_mm"].replace(".", ""))
+        nadir = int(a["prior_nadir_mm"].replace(".", ""))
+        baseline = int(a["baseline_sum_mm"].replace(".", ""))
+        expected = {"pd_relative_5S_ge_6N": (None if size is None else 5 * size, 6 * nadir),
+                    "pd_absolute_S_minus_N_ge_50": (None if size is None else size - nadir, 50),
+                    "pr_10S_le_7B": (None if size is None else 10 * size, 7 * baseline)}
+        for code, (left, right) in expected.items():
+            require((checks[code]["left"], checks[code]["right"]) == (left, right), "rule trace does not match exact source quantities")
+        if a["target_response"] == "NE":
+            require(not checks["context_open"]["passed"] or not checks["complete_measurements"]["passed"] or
+                    not checks["comparable_technique"]["passed"] or any(f["code"] == "prior_pr_context_required" for f in a["findings"]), "NE trace lost its blocking reason")
     verify_lesion_plot(outputs["html"], report)
     require("target_pd" in outputs["markdown"] if "PD" in expected else True, "Markdown omitted rule evidence")
     return report
@@ -287,7 +299,15 @@ def main():
         manifest = json.loads(first_files["manifest.json"])
         require(manifest["summary"] == report["summary"], "bundle manifest summary mismatch")
         for name in manifest["artifacts"]:
-            require(name in first_files, "manifest refers to a missing artifact")
+            require(name["name"] in first_files, "manifest refers to a missing artifact")
+            content = first_files[name["name"]]
+            require(name["sha256"] == hashlib.sha256(content).hexdigest(), "bundle SHA-256 differs from Python hashlib")
+            require(name["byte_length"] == len(content), "bundle byte length mismatch")
+        require(manifest["schema_version"] == 2 and manifest["software_version"] == "0.1.0", "bundle provenance missing")
+        raw_hashes = {item["name"]: item["sha256"] for item in manifest["inputs"] if item["representation"] == "raw_bytes"}
+        require(raw_hashes == {"study": hashlib.sha256((ROOT / "examples/study.json").read_bytes()).hexdigest(),
+                               "followup": hashlib.sha256((ROOT / "examples/followup.csv").read_bytes()).hexdigest()}, "raw source fingerprint mismatch")
+        require(json.loads(cli("--verify-bundle", str(bundle), "--format", "json").stdout)["valid"], "valid bundle did not verify")
         require(first_files["report.html"].decode("utf-8") == outputs["html"], "bundle differs from direct output")
         target = temp / "direct.html"
         cli(*prefix, "--format", "html", "--output", str(target))
@@ -297,6 +317,82 @@ def main():
         require((chinese_bundle / "report.html").read_text(encoding="utf-8") == chinese_outputs["html"], "Chinese bundle differs from direct HTML")
         require((chinese_bundle / "audit.json").read_bytes() == (bundle / "audit.json").read_bytes(), "bundle language changed JSON")
         passed("deterministic review bundles, manifest and direct file output")
+        manifest_path = bundle / "manifest.json"
+        original_manifest = manifest_path.read_bytes()
+        report_path = bundle / "report.html"
+        original_html = report_path.read_bytes()
+        report_path.write_bytes(original_html + b"\x00\xff")
+        tampered = json.loads(cli("--verify-bundle", str(bundle), "--format", "json", expected=2).stdout)
+        require(any(d["code"] == "bundle_mismatch" for d in tampered["diagnostics"]), "tampered artifact was accepted")
+        report_path.write_bytes(original_html)
+        chart_path = bundle / "chart.svg"
+        saved_chart = chart_path.read_bytes()
+        chart_path.unlink()
+        missing = json.loads(cli("--verify-bundle", str(bundle), "--format", "json", expected=2).stdout)
+        require(any(d["code"] == "bundle_missing" for d in missing["diagnostics"]), "missing artifact was accepted")
+        chart_path.write_bytes(saved_chart)
+        for key, value in (("schema_version", 999), ("inputs", [{**item, "sha256": "0" * 64} for item in manifest["inputs"]])):
+            changed = dict(manifest)
+            changed[key] = value
+            manifest_path.write_text(json.dumps(changed, ensure_ascii=False), encoding="utf-8")
+            cli("--verify-bundle", str(bundle), "--format", "json", expected=2)
+        changed = json.loads(original_manifest)
+        changed["artifacts"][0]["name"] = "../report.html"
+        manifest_path.write_text(json.dumps(changed), encoding="utf-8")
+        cli("--verify-bundle", str(bundle), "--format", "json", expected=2)
+        manifest_path.write_bytes(original_manifest)
+        before_verify = {p.name: p.read_bytes() for p in bundle.iterdir()}
+        cli("--verify-bundle", str(bundle), "--lang", "zh-CN")
+        require(before_verify == {p.name: p.read_bytes() for p in bundle.iterdir()}, "verification modified bundle bytes")
+        passed("bundle tampering, missing files, metadata and unsupported-version rejection")
+        comparison_args = ("--study", "examples/study.json", "--input", "examples/followup.revised.csv", "--compare-study", "examples/study.json", "--compare-input", "examples/followup.csv")
+        revision = json.loads(cli(*comparison_args, "--format", "json").stdout)
+        require(len(revision["input_changes"]) == 1 and revision["input_changes"][0]["visit_id"] == "week-4", "revision input change alignment failed")
+        affected = revision["affected_visits"]
+        require([v["visit_id"] for v in affected] == ["week-4", "week-6", "week-8"], "downstream affected visits missing")
+        require(affected[1]["before"]["target_response"] == "PR" and affected[1]["after"]["target_response"] == "PD", "revision did not replay changed nadir")
+        require(affected[2]["after"]["target_response"] == "NE", "revision lost the post-PD context gate")
+        same = json.loads(cli(*prefix, "--compare-study", "examples/study.json", "--compare-input", "examples/followup.csv", "--format", "json").stdout)
+        require(not same["input_changes"] and not same["affected_visits"], "identical revisions must have an empty diff")
+        revision_html = cli(*comparison_args, "--format", "html", "--lang", "zh-CN").stdout
+        require(revision_html == (ROOT / "examples/revision.zh-CN.html").read_text(encoding="utf-8"), "revision preview stale")
+        require("后续影响" in revision_html and "9.0" in revision_html, "revision HTML missing evidence")
+        cli(*comparison_args, "--format", "markdown")
+        cli(*comparison_args, "--output", "examples/followup.csv", expected=2)
+        passed("revision identity alignment, empty diffs, downstream nadir effects and source protection")
+        batch_folder = temp / "清单位置"
+        batch_folder.mkdir()
+        batch_study = batch_folder / "study.json"
+        batch_csv = batch_folder / "followup.csv"
+        batch_study.write_bytes((ROOT / "examples/study.json").read_bytes())
+        batch_csv.write_bytes((ROOT / "examples/followup.csv").read_bytes())
+        (batch_folder / "bad.csv").write_text("invalid header\n", encoding="utf-8")
+        batch_manifest = batch_folder / "batch.json"
+        cases = [{"id": "case-001", "study": "study.json", "input": "followup.csv"},
+                 {"id": "case-bad", "study": "study.json", "input": "bad.csv"},
+                 {"id": "case-missing", "study": "study.json", "input": "absent.csv"},
+                 {"id": "case-002", "study": "study.json", "input": "followup.csv"}]
+        batch_manifest.write_text(json.dumps({"schema_version": 1, "cases": cases}), encoding="utf-8")
+        batch_output = temp / "批量输出"
+        cli("--batch", str(batch_manifest), "--bundle", str(batch_output), "--lang", "zh-CN", expected=3)
+        index = json.loads((batch_output / "index.json").read_text(encoding="utf-8"))
+        require((index["success_count"], index["failure_count"]) == (2, 2), "batch failure isolation failed")
+        require([c["status"] for c in index["cases"]] == ["success", "input_error", "io_error", "success"], "batch lost per-case failure details")
+        require((batch_output / "case-002/audit.json").read_bytes() == (bundle / "audit.json").read_bytes(), "batch changed independent replay")
+        require(not (batch_output / "case-bad").exists(), "invalid case left an empty report directory")
+        cli("--verify-bundle", str(batch_output / "case-001"), "--format", "json")
+        index_bytes = (batch_output / "index.json").read_bytes()
+        cli("--batch", str(batch_manifest), "--bundle", str(batch_output), expected=2)
+        require((batch_output / "index.json").read_bytes() == index_bytes, "batch overwrote an existing output root")
+        cases[1]["id"] = "../outside"
+        batch_manifest.write_text(json.dumps({"schema_version": 1, "cases": cases}), encoding="utf-8")
+        rejected_output = temp / "rejected-batch"
+        cli("--batch", str(batch_manifest), "--bundle", str(rejected_output), expected=2)
+        require(not rejected_output.exists(), "invalid batch created output")
+        complete_batch = temp / "complete-batch"
+        cli("--batch", "examples/batch.json", "--bundle", str(complete_batch))
+        require(json.loads((complete_batch / "index.json").read_text(encoding="utf-8"))["failure_count"] == 0, "saved batch example failed")
+        passed("batch relative paths, isolated failures, matching outputs, portable IDs and non-overwrite")
         study_path = temp / "study.json"
         csv_path = temp / "input.csv"
         study_text = (ROOT / "examples/study.json").read_text(encoding="utf-8")

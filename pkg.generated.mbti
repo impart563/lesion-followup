@@ -9,9 +9,15 @@ import {
 }
 
 // Values
+pub fn compare_tracks(@evidence.Trajectory, @evidence.Trajectory) -> Result[@evidence.TrackRevision, Array[@io.Diagnostic]]
+
+pub fn explain_assessment(@evidence.VisitAssessment) -> Array[@evidence.RuleCheck]
+
 pub fn format_diameter_mm(Int) -> String
 
 pub fn input_template_files(String, language? : @io.ReportLanguage) -> Result[Array[(String, String)], String]
+
+pub fn parse_batch_json(String) -> Result[Array[@io.BatchCase], Array[@io.Diagnostic]]
 
 pub fn parse_diameter_mm(String) -> Result[Int, String]
 
@@ -37,11 +43,23 @@ pub fn render_audit_markdown(@evidence.Trajectory) -> String
 
 pub fn render_audit_markdown_in(@evidence.Trajectory, @io.ReportLanguage) -> String
 
+pub fn render_batch_index_html(Array[@io.BatchResult], language? : @io.ReportLanguage) -> String
+
+pub fn render_batch_index_json(Array[@io.BatchResult]) -> String
+
+pub fn render_bundle_manifest(@evidence.Trajectory, Array[(String, String)], language? : @io.ReportLanguage, raw_inputs? : Array[(String, Bytes)]) -> String
+
 pub fn render_lesion_trends_svg(@evidence.Trajectory, language? : @io.ReportLanguage) -> String
 
 pub fn render_preflight_json(@io.PreflightReport) -> String
 
 pub fn render_preflight_markdown(@io.PreflightReport, language? : @io.ReportLanguage) -> String
+
+pub fn render_revision_html(@evidence.TrackRevision, language? : @io.ReportLanguage) -> String
+
+pub fn render_revision_json(@evidence.TrackRevision) -> String
+
+pub fn render_revision_markdown(@evidence.TrackRevision, language? : @io.ReportLanguage) -> String
 
 pub fn render_trajectory_svg(@evidence.Trajectory) -> String
 
@@ -51,18 +69,30 @@ pub fn render_validation_json(Array[@io.Diagnostic], Array[@evidence.InputIssue]
 
 pub fn replay_track(@lesion.Study, Array[@visit.Visit]) -> Result[@evidence.Trajectory, Array[@evidence.InputIssue]]
 
+pub fn review_artifacts(@evidence.Trajectory, language? : @io.ReportLanguage) -> Array[(String, String)]
+
+pub fn sha256_hex(Bytes) -> String
+
 pub fn validate_study(@lesion.Study) -> Array[@evidence.InputIssue]
 
 pub fn validate_track(@lesion.Study, Array[@visit.Visit]) -> Array[@evidence.InputIssue]
+
+pub fn verify_bundle(String, Array[(String, Bytes)]) -> Array[@io.Diagnostic]
 
 // Errors
 
 // Types and methods
 
 // Type aliases
+pub using @io {type BatchCase}
+
+pub using @io {type BatchResult}
+
 pub using @io {type Diagnostic}
 
 pub using @evidence {type Finding}
+
+pub using @evidence {type InputChange}
 
 pub using @evidence {type InputIssue}
 
@@ -82,16 +112,22 @@ pub using @evidence {type ResolvedMeasurement}
 
 pub using @io {type ReviewNotice}
 
+pub using @evidence {type RuleCheck}
+
 pub using @lesion {type Study}
 
 pub using @lesion {type TargetLesion}
 
 pub using @evidence {type TargetResponse}
 
+pub using @evidence {type TrackRevision}
+
 pub using @evidence {type Trajectory}
 
 pub using @visit {type Visit}
 
 pub using @evidence {type VisitAssessment}
+
+pub using @evidence {type VisitImpact}
 
 // Traits

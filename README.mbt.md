@@ -72,6 +72,65 @@ visit. Lines stop at NE or missing visits. These observations do not make that
 visit eligible for the sum trend or nadir. The standalone `svg` CLI format
 continues to export the sum chart.
 
+### Explain calculations and compare revisions
+
+HTML and Markdown now expand the exact conditions for each visit. JSON adds
+`rule_checks` with integer operands, an operator, a nullable result and `active`.
+S is the current sum, B the baseline, and N the prior eligible minimum.
+The trace shows `5*S >= 6*N`, `S-N >= 50` and `10*S <= 7*B` in 0.1 mm units,
+plus completeness, technique/context gates and per-target CR conditions.
+An inactive comparison can be numerically true without selecting a category;
+earlier gates and rule priority still apply. Findings explain NE requirements.
+
+Compare two independent replays of the same exact baseline profile:
+
+```sh
+moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --format html --lang zh-CN --output revision.html
+```
+
+The revised files use `--study` and `--input`; original files use
+`--compare-study` and `--compare-input`. Output supports JSON, Markdown and HTML.
+Both tracks must have identical study identity, baseline, acquisition metadata
+and ordered baseline target set. Visits and observations are aligned by IDs.
+Input additions, removals and changed fields are separate from downstream
+assessment changes. Identical input gives an empty difference. All four source
+paths are protected from output replacement.
+
+The [saved Chinese comparison](examples/revision.zh-CN.html) changes week-4 T1
+from 10.0 to 9.0 mm. The minimum becomes 19.0 instead of 20.0 mm; week-6's
+24.0 mm sum then meets both PD conditions, and week-8 requires post-PD review.
+
+### Verify bundles and review batches
+
+```sh
+moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --bundle review-bundle
+moon run --target native cmd/demo -- --verify-bundle review-bundle --format json
+moon run --target native cmd/demo -- --batch examples/batch.json --bundle new-batch-reviews --lang zh-CN
+```
+
+New bundles use manifest schema 2: software/rule versions, language, semantic
+input fingerprints, raw-file SHA-256 when file inputs were used, and exact UTF-8
+artifact lengths and SHA-256. There are no timestamps or local source paths.
+Verification checks the four fixed artifact names, contents, semantic input
+fingerprints and summary against `audit.json`; it rejects missing files,
+modified bytes, unknown profiles/versions and unsafe names. It does not modify
+the bundle. Hashes check integrity; they are not signatures or proof of author
+identity. Original-file fingerprints are recorded, not rechecked against absent
+source files. The legacy `render_audit_manifest` API still emits metadata-only
+schema 1; use `render_bundle_manifest` for the verifiable schema 2.
+
+The [batch manifest](examples/batch.json) uses schema 1 and a `cases` array of
+`id`, `study` and `input`. Relative paths are resolved against that manifest's
+directory. IDs are portable ASCII letters/digits/underscore/hyphen, at most
+64 characters, unique ignoring case; device names and path components are
+rejected. The list accepts 1–1000 cases. Use synthetic identifiers.
+
+Batch output requires a new directory. Each successful case gets its own
+verifiable bundle, and `index.json`/`index.html` retain every case, including
+input and I/O failures. A failure does not stop later cases. Exit code 3 means
+one or more cases failed; a global manifest error remains 2, and a global I/O
+failure remains 1. Valid NE or PD reports still count as successful processing.
+
 | Synthetic scenario | What it demonstrates | Ordered target categories |
 | --- | --- | --- |
 | `nadir-boundary` | Baseline 100.0 mm, then 20.0, 24.0, 25.0; PD needs both relative and absolute growth | PR, PR, PD |
@@ -87,6 +146,7 @@ artifact bytes. It replaces those named files in the selected directory.
 
 CLI exit codes are `0` for valid input (including NE or PD observations), `2` for
 arguments, parsing or structural validation errors, and `1` for I/O failures.
+Batch partial failure uses `3` as described above.
 `--check-input` validates schema and track structure and highlights review
 requirements; the reader still determines clinical comparability.
 
@@ -140,6 +200,9 @@ accept `ReportLanguage` (`English` or `SimplifiedChinese`).
 `preflight_inputs` and `preflight_track` return a `PreflightReport`, whose
 `is_valid()` checks blocking errors separately from `review_hints`.
 `render_preflight_json` and `render_preflight_markdown` format that report.
+`explain_assessment` exposes typed `RuleCheck` values; `compare_tracks` returns
+`TrackRevision` with input changes and affected assessments. The bundle and
+batch parsing/rendering APIs remain pure; filesystem operations stay in the CLI.
 
 `replay_track` rejects structurally invalid tracks as a whole. Successful replay
 snapshots the supplied arrays and preserves visit order. Missing or unsupported

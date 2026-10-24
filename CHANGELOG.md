@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Expand exact per-visit calculation conditions with gate and priority context,
+  available through typed checks and bilingual HTML/Markdown/JSON reports.
+- Compare independently replayed revisions by visit/target identity, preserving
+  input changes and downstream minimum/category effects.
+- Add version-2 deterministic bundle provenance, SHA-256 and byte-length checks,
+  plus read-only validation of fixed artifacts and semantic input metadata.
+- Add isolated batch review with manifest-relative paths, portable case IDs,
+  per-case failure records, linked indexes and a partial-failure exit status.
+
 - Generate matched single- and multi-target synthetic input templates in a new,
   overwrite-protected directory, with English or Chinese filling instructions.
 - Add source-located input-quality preflight, separating blocking errors from

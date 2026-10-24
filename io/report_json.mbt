@@ -153,6 +153,7 @@ pub fn render_audit_json(trajectory : @evidence.Trajectory) -> String {
       ),
       "measurements": measurements.to_json(),
       "findings": findings.to_json(),
+      "rule_checks": checks_json(assessment),
     }
   })
   let document : Json = {

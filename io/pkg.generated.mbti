@@ -9,9 +9,13 @@ import {
 }
 
 // Values
+pub fn compare_tracks(@evidence.Trajectory, @evidence.Trajectory) -> Result[@evidence.TrackRevision, Array[Diagnostic]]
+
 pub fn format_diameter_mm(Int) -> String
 
 pub fn input_template_files(String, language? : ReportLanguage) -> Result[Array[(String, String)], String]
+
+pub fn parse_batch_json(String) -> Result[Array[BatchCase], Array[Diagnostic]]
 
 pub fn parse_diameter_mm(String) -> Result[Int, String]
 
@@ -37,11 +41,23 @@ pub fn render_audit_markdown(@evidence.Trajectory) -> String
 
 pub fn render_audit_markdown_in(@evidence.Trajectory, ReportLanguage) -> String
 
+pub fn render_batch_index_html(Array[BatchResult], language? : ReportLanguage) -> String
+
+pub fn render_batch_index_json(Array[BatchResult]) -> String
+
+pub fn render_bundle_manifest(@evidence.Trajectory, Array[(String, String)], language? : ReportLanguage, raw_inputs? : Array[(String, Bytes)]) -> String
+
 pub fn render_lesion_trends_svg(@evidence.Trajectory, language? : ReportLanguage) -> String
 
 pub fn render_preflight_json(PreflightReport) -> String
 
 pub fn render_preflight_markdown(PreflightReport, language? : ReportLanguage) -> String
+
+pub fn render_revision_html(@evidence.TrackRevision, language? : ReportLanguage) -> String
+
+pub fn render_revision_json(@evidence.TrackRevision) -> String
+
+pub fn render_revision_markdown(@evidence.TrackRevision, language? : ReportLanguage) -> String
 
 pub fn render_trajectory_svg(@evidence.Trajectory) -> String
 
@@ -49,9 +65,36 @@ pub fn render_trajectory_svg_in(@evidence.Trajectory, ReportLanguage) -> String
 
 pub fn render_validation_json(Array[Diagnostic], Array[@evidence.InputIssue], Int) -> String
 
+pub fn review_artifacts(@evidence.Trajectory, language? : ReportLanguage) -> Array[(String, String)]
+
+pub fn sha256_hex(Bytes) -> String
+
+pub fn verify_bundle(String, Array[(String, Bytes)]) -> Array[Diagnostic]
+
 // Errors
 
 // Types and methods
+pub(all) struct BatchCase {
+  id : String
+  study : String
+  input : String
+} derive(Eq, @debug.Debug)
+pub fn BatchCase::equal(Self, Self) -> Bool
+pub fn BatchCase::not_equal(Self, Self) -> Bool
+pub fn BatchCase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct BatchResult {
+  id : String
+  status : String
+  message : String
+  report_path : String?
+  visit_count : Int
+  review_hint_count : Int
+} derive(Eq, @debug.Debug)
+pub fn BatchResult::equal(Self, Self) -> Bool
+pub fn BatchResult::not_equal(Self, Self) -> Bool
+pub fn BatchResult::to_repr(Self) -> @debug.Repr
+
 pub(all) struct Diagnostic {
   code : String
   message : String

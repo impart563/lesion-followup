@@ -1,6 +1,7 @@
 import {
   "moonbitlang/core/json",
   "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/utf8",
   "impart563/lesion-followup/lesion",
   "impart563/lesion-followup/visit",
   "impart563/lesion-followup/evidence",

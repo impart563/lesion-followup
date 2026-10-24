@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub fn explain_assessment(@evidence.VisitAssessment) -> Array[@evidence.RuleCheck]
+
 pub fn replay_track(@lesion.Study, Array[@visit.Visit]) -> Result[@evidence.Trajectory, Array[@evidence.InputIssue]]
 
 pub fn validate_study(@lesion.Study) -> Array[@evidence.InputIssue]

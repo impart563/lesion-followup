@@ -29,9 +29,45 @@ test "CLI rejects incompatible or incomplete modes" {
       ["--init-example", "new", "--format", "markdown"],
       ["--init-example", "new", "--check-input"],
       ["--init-example", "new", "--bundle", "bundle"],
+      ["--batch", "batch.json"],
+      [
+        "--batch", "batch.json", "--bundle", "new", "--study", "s", "--input", "i",
+      ],
+      ["--verify-bundle", "b", "--output", "b/report.html"],
+      ["--verify-bundle", "b", "--batch", "batch.json", "--bundle", "new"],
+      ["--compare-study", "s"],
+      ["--compare-study", "s", "--compare-input", "i"],
+      [
+        "--study", "s", "--input", "i", "--compare-study", "s", "--compare-input",
+        "i", "--format", "csv",
+      ],
+      ["--study", "s", "--study", "other", "--input", "i"],
     ] {
     assert_true(parse_args(args) is Err(_))
   }
+}
+
+///|
+test "CLI accepts revision, read-only verification and isolated batch modes" {
+  assert_true(
+    parse_args(["--batch", "batch.json", "--bundle", "new", "--lang", "zh-CN"])
+    is Ok(_),
+  )
+  assert_true(
+    parse_args(["--verify-bundle", "bundle", "--format", "json"]) is Ok(_),
+  )
+  assert_true(
+    parse_args([
+      "--study", "new.json", "--input", "new.csv", "--compare-study", "old.json",
+      "--compare-input", "old.csv", "--format", "html",
+    ])
+    is Ok(_),
+  )
+  assert_eq(
+    resolve_input("C:/folder", "relative.csv"),
+    "C:/folder/relative.csv",
+  )
+  assert_eq(resolve_input("/folder", "/absolute.csv"), "/absolute.csv")
 }
 
 ///|
