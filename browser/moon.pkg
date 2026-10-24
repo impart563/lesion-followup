@@ -1,0 +1,8 @@
+import {
+  "moonbitlang/core/json",
+  "impart563/lesion-followup" @lib,
+}
+
+options(
+  link: { "js": { "exports": [ "evaluate" ], "format": "esm" } },
+)

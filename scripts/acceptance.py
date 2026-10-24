@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+from browser_acceptance import verify_browser
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -48,7 +49,7 @@ def source_digest():
     included = []
     for path in source_paths():
         relative = path.relative_to(ROOT)
-        if path.name == "acceptance-results.json" or path.suffix in {".zip", ".html", ".png"}:
+        if path.name == "acceptance-results.json" or path.suffix in {".zip", ".png"} or (path.suffix == ".html" and relative.parts[0] == "examples"):
             continue
         included.append(relative.as_posix())
         digest.update(relative.as_posix().encode("utf-8") + b"\0")
@@ -124,10 +125,10 @@ def verify_formats(outputs, expected):
         size = None if a["sum_mm"] is None else int(a["sum_mm"].replace(".", ""))
         nadir = int(a["prior_nadir_mm"].replace(".", ""))
         baseline = int(a["baseline_sum_mm"].replace(".", ""))
-        expected = {"pd_relative_5S_ge_6N": (None if size is None else 5 * size, 6 * nadir),
+        expected_operands = {"pd_relative_5S_ge_6N": (None if size is None else 5 * size, 6 * nadir),
                     "pd_absolute_S_minus_N_ge_50": (None if size is None else size - nadir, 50),
                     "pr_10S_le_7B": (None if size is None else 10 * size, 7 * baseline)}
-        for code, (left, right) in expected.items():
+        for code, (left, right) in expected_operands.items():
             require((checks[code]["left"], checks[code]["right"]) == (left, right), "rule trace does not match exact source quantities")
         if a["target_response"] == "NE":
             require(not checks["context_open"]["passed"] or not checks["complete_measurements"]["passed"] or
@@ -453,6 +454,7 @@ def main():
         data_rows = list(csv.DictReader(io.StringIO(unsafe_outputs["csv"])))
         require(any(row["message"] == malicious for row in data_rows), "CSV lost a quoted multiline note")
         passed("untrusted text escaping and multiline CSV round trip")
+    browser = verify_browser(run, cli, outputs, chinese_outputs, passed, environment)
     run(["package"])
     package_path = ROOT / "_build" / "publish" / "impart563-lesion-followup-0.1.0.zip"
     with ZipFile(package_path) as archive:
@@ -473,6 +475,7 @@ def main():
         "toolchain": version.replace(str(Path.home()), "~"),
         "python_version": __import__("sys").version.split()[0],
         "unit_tests": test_counts,
+        "browser_adapter": browser,
         "workflow_checks": checks,
         "scenario_summaries": scenario_summaries,
         "file_input_summary": report["summary"],

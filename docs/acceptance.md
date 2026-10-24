@@ -20,7 +20,8 @@ moon run --target native cmd/demo -- --study examples/study.json --input example
 python scripts/acceptance.py --record docs/acceptance-results.json
 ```
 
-The script uses Python 3.8+ standard library. MoonBit is discovered on PATH or in
+The script uses Python 3.8+ standard library and Node.js for browser-module
+acceptance (CI uses Node 22). MoonBit is discovered on PATH or in
 the standard `~/.moon/bin` installation. Build tools required by MoonBit's native
 target must be installed. The library targets wasm, wasm-gc, JavaScript and
 native; filesystem CLI tests run only on native.
@@ -55,14 +56,20 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Revisions | Measurement alignment, same-input empty differences, visit additions/removals, baseline rejection and downstream nadir/category effects |
 | Bundle provenance | Independent Python hashlib comparison, raw-file fingerprints, byte lengths, tampering/missing files/profile/version rejection and read-only verification |
 | Batch workflow | Manifest-relative paths, partial input/I/O failure isolation, matching per-case results, portable IDs and rejection of existing output roots |
+| Browser adapter | Release ES module export, strict versioned requests, templates, stateless calls and byte-identical bilingual CLI reports; exact clinical boundaries, NE gates, Unicode and located input failures |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
 count, workflow groups and a SHA-256 fingerprint of source/configuration inputs.
-Build/cache directories, generated HTML previews, images, archives and the
+Build/cache directories, generated example HTML previews, images, archives and the
 result record itself are excluded from that fingerprint; line endings are
 normalized to LF. Source changes require a new record. Temporary test inputs
 are created by the script and are removed on completion.
+
+The handwritten browser smoke HTML is included in the source fingerprint.
+Browser acceptance records the Node version, request count and native parity
+case count. The [browser adapter contract](browser-adapter.md) contains build,
+import and smoke-page instructions, and the actual browser check record.
 
 The separate consumer uses a local `moon.work` linking this checkout. This
 verifies module boundaries before a registry release, not installation of an

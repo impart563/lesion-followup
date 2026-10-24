@@ -218,6 +218,22 @@ moon run --target native examples/quickstart
 moon -C examples/downstream-consumer run --target native .
 ```
 
+## Browser computation
+
+Build a self-contained JavaScript ES module and synthetic smoke page:
+
+```sh
+python scripts/build_browser.py
+```
+
+`_build/browser/browser.js` exports `evaluate(request_json: string): string`.
+The versioned JSON boundary supports review, quality preflight and matched
+templates, using the existing MoonBit core. Input errors retain source locations;
+valid NE observations remain successful evaluations. There is no network or
+storage access in the adapter. See [the browser contract and import example](docs/browser-adapter.md)
+for serving the smoke page and connecting an application. File editing and draft
+storage are subsequent interface features.
+
 ## Exact inputs and evidence
 
 [Study JSON](examples/study.json) declares `schema_version: 1`, a baseline date,
@@ -287,9 +303,9 @@ python scripts/acceptance.py
 ```
 
 The acceptance script discovers `moon` on PATH or in `~/.moon/bin`, requires only
-Python 3.8+ standard library, runs warning-free all-target checks/tests, native
+Python 3.8+ standard library plus Node.js for browser-module checks, runs warning-free all-target checks/tests, native
 build, README examples, public interfaces, a separate consumer module, five-format
-consistency, deterministic bundles, CLI failures and escaping checks, and builds
+consistency, browser/native parity, deterministic bundles, CLI failures and escaping checks, and builds
 the Mooncakes source package. [Acceptance details](docs/acceptance.md) and the
 [recorded local result](docs/acceptance-results.json) identify verified commands
 and the source fingerprint. The same script is configured in CI.

@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "impart563/lesion-followup/browser"
+
+// Values
+pub fn evaluate(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

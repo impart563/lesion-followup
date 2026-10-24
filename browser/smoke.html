@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>靶病灶浏览器适配层核查</title>
+<style>
+body{font:16px/1.6 system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;color:#183439;background:#f5f9f8}
+h1{font-size:28px}pre{padding:20px;border:1px solid #b7cdca;border-radius:8px;background:white;white-space:pre-wrap;overflow-wrap:anywhere}
+#status{font-size:20px;font-weight:600}small{color:#496464}
+</style>
+<h1>靶病灶浏览器适配层核查</h1>
+<p>仅使用合成输入核查浏览器调用；结果只涉及靶病灶，不确定整体疗效，不提供治疗建议，也不代表临床验证。</p>
+<p id="status" role="status">正在载入本地 MoonBit 模块……</p>
+<pre id="results"></pre>
+<small id="runtime"></small>
+<script type="module">
+const status = document.getElementById("status");
+const results = document.getElementById("results");
+document.getElementById("runtime").textContent = navigator.userAgent;
+try {
+  const { evaluate } = await import("./browser.js");
+  const call = request => JSON.parse(evaluate(JSON.stringify({ schema_version: 1, ...request })));
+  const template = call({ action: "template", language: "zh-CN" });
+  if (!template.ok) throw new Error("模板调用失败");
+  const files = Object.fromEntries(template.result.files.map(file => [file.name, file.content]));
+  const request = { action: "review", study_json: files["study.json"], followup_csv: files["followup.csv"] };
+  const normal = call(request);
+  const categories = JSON.parse(normal.result.content).assessments.map(a => a.target_response);
+  const invalid = call({ ...request, followup_csv: files["followup.csv"].replace("20.0,", "20.01,") });
+  const ne = call({ ...request, followup_csv: "visit_id,date,technique_id,lesion_id,state,diameter_mm,note\nv1,2026-01-02,changed,N1,too_small,,\n" });
+  const badRequest = JSON.parse(evaluate("{"));
+  const checks = [
+    ["合成模板与靶病灶结果", normal.ok && categories.join(",") === "PR,PR,PR,PD"],
+    ["拒绝额外小数且保留输入定位", !invalid.ok && invalid.error_kind === "input" && invalid.result === null && invalid.preflight.diagnostics[0].field === "diameter_mm"],
+    ["不可评价观察保持有效输入", ne.ok && JSON.parse(ne.result.content).assessments[0].target_response === "NE" && ne.preflight.review_hints.length === 3],
+    ["请求错误使用统一返回契约", !badRequest.ok && badRequest.error_kind === "request" && badRequest.diagnostics[0].code === "request_json"],
+    ["重复调用保持结果一致", JSON.stringify(call(request)) === JSON.stringify(normal)],
+  ];
+  results.textContent = checks.map(([name, ok]) => `${ok ? "PASS" : "FAIL"} ${name}`).join("\n") + "\n\n靶病灶分类：" + categories.join(" → ");
+  const passed = checks.filter(([, ok]) => ok).length;
+  status.textContent = `${passed === checks.length ? "通过" : "失败"}：${passed}/${checks.length} 项浏览器核查`;
+} catch (error) {
+  status.textContent = "核查失败";
+  results.textContent = String(error);
+}
+</script>
+</html>
