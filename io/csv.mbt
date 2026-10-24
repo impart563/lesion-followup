@@ -126,6 +126,47 @@ fn cell_error(
 }
 
 ///|
+/// Decode editable text cells using the clinical parser's quoting and locations.
+/// Only CSV shape is checked here; clinical state/precision validation remains
+/// in parse_followup_csv and preflight_inputs. The header is not returned.
+pub fn parse_followup_cells(
+  text : String,
+) -> Result[Array[Array[String]], Array[Diagnostic]] {
+  let rows = match csv_rows(text) {
+    Ok(rows) => rows
+    Err(errors) => return Err(errors)
+  }
+  let header = [
+    "visit_id", "date", "technique_id", "lesion_id", "state", "diameter_mm", "note",
+  ]
+  if rows.is_empty() || rows[0].map(c => c.text) != header {
+    return Err([
+      diagnostic(
+        "csv_header",
+        "Expected header: " + header.join(","),
+        line=1,
+        column=1,
+      ),
+    ])
+  }
+  let cells = []
+  for row in rows[1:] {
+    if row.length() != header.length() {
+      return Err([
+        diagnostic(
+          "csv_columns",
+          "Expected seven fields.",
+          line=row[0].line,
+          column=1,
+        ),
+      ])
+    }
+    cells.push(row.map(c => c.text))
+  }
+  Ok(cells)
+}
+
+///|
 /// Long-form CSV: one target observation per row. Visit rows must be contiguous;
 /// the parser preserves order and rejects partial results on any parse error.
 pub fn parse_followup_csv(

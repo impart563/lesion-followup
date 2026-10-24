@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Add an offline browser workbench for paired input import, baseline/observation
+  editing, located diagnostics, five-format export and current-report review.
+- Add explicit local and portable draft saving/restoring with strict version
+  checks; input changes immediately invalidate earlier reports and print views.
+- Add summary/full-evidence A4 print layouts with matching input fingerprints,
+  repeated table headings and long-track pagination checks.
+- Add a shape-only CSV cell decoder and an `editor` browser action, retaining
+  invalid clinical values for correction while the existing preflight gates replay.
+- Refine workbench navigation, tables, state messages and Chinese copy.
+
 - Expand exact per-visit calculation conditions with gate and priority context,
   available through typed checks and bilingual HTML/Markdown/JSON reports.
 - Compare independently replayed revisions by visit/target identity, preserving

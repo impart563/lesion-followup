@@ -55,6 +55,7 @@ pub using @io {
   format_diameter_mm,
   parse_study_json,
   parse_followup_csv,
+  parse_followup_cells,
   render_audit_json,
   render_audit_markdown,
   render_audit_csv,

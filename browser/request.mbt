@@ -49,13 +49,15 @@ fn decode_request(text : String) -> Request raise RequestError {
     )
   }
   let action = string_field(fields, "action")
-  guard ["review", "preflight", "template"].contains(action) else {
+  guard ["review", "preflight", "template", "editor"].contains(action) else {
     raise RequestError(
-      "request_action", "$.action", "Use review, preflight or template.",
+      "request_action", "$.action", "Use review, preflight, template or editor.",
     )
   }
   let keys = if action == "template" {
     ["schema_version", "action", "language", "template"]
+  } else if action == "editor" {
+    ["schema_version", "action", "language", "study_json", "followup_csv"]
   } else {
     [
       "schema_version", "action", "language", "format", "study_json", "followup_csv",
@@ -88,7 +90,7 @@ fn decode_request(text : String) -> Request raise RequestError {
   } else {
     ""
   }
-  let format = if action == "template" {
+  let format = if action == "template" || action == "editor" {
     ""
   } else {
     let format = string_field(fields, "format", default="json")

@@ -218,21 +218,34 @@ moon run --target native examples/quickstart
 moon -C examples/downstream-consumer run --target native .
 ```
 
-## Browser computation
+## Offline browser workbench
 
-Build a self-contained JavaScript ES module and synthetic smoke page:
+Build the local workbench, JavaScript ES module and synthetic smoke page:
 
 ```sh
 python scripts/build_browser.py
 ```
 
 `_build/browser/browser.js` exports `evaluate(request_json: string): string`.
-The versioned JSON boundary supports review, quality preflight and matched
-templates, using the existing MoonBit core. Input errors retain source locations;
-valid NE observations remain successful evaluations. There is no network or
-storage access in the adapter. See [the browser contract and import example](docs/browser-adapter.md)
-for serving the smoke page and connecting an application. File editing and draft
-storage are subsequent interface features.
+The workbench in `_build/browser/index.html` imports paired JSON/CSV files,
+edits baseline targets and follow-up observations, locates input problems and
+previews the current target-only report. Input changes invalidate earlier
+reports. Explicit local/portable drafts preserve unfinished records; summary and
+full-evidence layouts support A4 printing and standalone HTML export.
+
+The versioned JSON boundary supports review, preflight, templates and editable
+text cells, using the existing MoonBit core. Input errors retain source locations;
+valid NE observations remain successful evaluations. The adapter itself has no
+file, network or storage access. Browser-side file selection, downloads and
+explicit draft persistence belong to the workbench.
+
+See [the workbench guide](docs/workbench.md) for local serving and the review
+workflow, or [the browser contract](docs/browser-adapter.md) for application
+integration. The build loads only local assets; it requires a local HTTP server
+for browser module imports. No server-side computation or external service is
+needed.
+
+![Offline review workbench](docs/workbench-desktop.jpg)
 
 ## Exact inputs and evidence
 

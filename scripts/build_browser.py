@@ -18,7 +18,8 @@ def package_browser():
     if source_map.exists():
         shutil.copyfile(str(source_map), str(output / "browser.js.map"))
     shutil.copyfile(str(ROOT / "browser" / "browser.d.ts"), str(output / "browser.d.ts"))
-    shutil.copyfile(str(ROOT / "browser" / "smoke.html"), str(output / "index.html"))
+    for name in ("index.html", "smoke.html", "app.mjs", "workbench.mjs", "workbench.css"):
+        shutil.copyfile(str(ROOT / "browser" / name), str(output / name))
     (output / "package.json").write_text(json.dumps({"type": "module"}) + "\n", encoding="utf-8")
     print("Browser files: " + str(output))
     return output

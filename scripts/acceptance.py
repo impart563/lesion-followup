@@ -49,7 +49,7 @@ def source_digest():
     included = []
     for path in source_paths():
         relative = path.relative_to(ROOT)
-        if path.name == "acceptance-results.json" or path.suffix in {".zip", ".png"} or (path.suffix == ".html" and relative.parts[0] == "examples"):
+        if path.name == "acceptance-results.json" or path.suffix.lower() in {".zip", ".png", ".jpg", ".jpeg", ".webp"} or (path.suffix == ".html" and relative.parts[0] == "examples"):
             continue
         included.append(relative.as_posix())
         digest.update(relative.as_posix().encode("utf-8") + b"\0")
@@ -460,6 +460,7 @@ def main():
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
+    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")

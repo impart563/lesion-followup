@@ -56,6 +56,21 @@ fn dispatch(request : Request) -> Json {
   let quality = @json.parse(@lib.render_preflight_json(preflight)) catch {
     _ => abort("Core preflight renderer returned invalid JSON")
   }
+  if request.action == "editor" {
+    // A table can retain invalid clinical observations for correction. It is
+    // not a replay result; preflight.valid must still gate reports and printing.
+    guard @lib.parse_study_json(request.study_json) is Ok(_) &&
+      @lib.parse_followup_cells(request.followup_csv) is Ok(rows) else {
+      return envelope(action, false, "input", [], quality, Json::null())
+    }
+    let study = @json.parse(request.study_json) catch {
+      _ => abort("Validated study JSON could not be decoded")
+    }
+    return envelope(action, true, Json::null(), [], quality, {
+      "study": study,
+      "rows": rows.to_json(),
+    })
+  }
   if !preflight.is_valid() {
     return envelope(action, false, "input", [], quality, Json::null())
   }

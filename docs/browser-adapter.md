@@ -16,7 +16,8 @@ python scripts/build_browser.py
 ```
 
 The output in `_build/browser/` contains `browser.js`, its TypeScript declaration,
-a module-type `package.json`, and `index.html`, a synthetic smoke page. A source
+a module-type `package.json`, the workbench `index.html` and its local assets,
+and `smoke.html`, a synthetic smoke page. A source
 map is copied if emitted by the compiler. The JavaScript module has no runtime
 dependencies or external asset imports. Serve these local files over HTTP with
 a static server; browsers generally restrict ES module loading from `file:` URLs.
@@ -33,9 +34,9 @@ python -u -c "import http.server,socketserver; server=socketserver.TCPServer(('1
 ```
 
 Open `http://127.0.0.1:8765/_build/browser/` for the Windows command, or
-`http://127.0.0.1:8765/` when serving the output directory. The smoke page runs
-five synthetic checks; it is a developer check for the adapter. File import,
-table editing, draft persistence and print layouts remain later roadmap items.
+`http://127.0.0.1:8765/` when serving the output directory. Append `smoke.html`
+for the five synthetic adapter checks. The [workbench guide](workbench.md)
+describes import, editing, explicit drafts and current-report printing.
 
 Import from your application, using text read by your own file picker:
 
@@ -79,6 +80,7 @@ does not select a default. `language` defaults to `en` and accepts `en` or `zh-C
 | `review` | `study_json`, `followup_csv` | `language`, `format` = `json` | Existing audit/report text |
 | `preflight` | `study_json`, `followup_csv` | `language`, `format` = `json` | Input checks without response categories |
 | `template` | None | `language`, `template` = `multi` | Matched synthetic files |
+| `editor` | `study_json`, `followup_csv` | `language` | Parsed study and editable CSV cells, with preflight |
 
 `review` accepts `json`, `csv`, `markdown`, `svg` and `html`. `preflight` accepts
 `json` and `markdown`. `template` accepts `single` or `multi` and returns
@@ -86,6 +88,15 @@ does not select a default. `language` defaults to `en` and accepts `en` or `zh-C
 These are the same files returned by the existing template API; writing files
 or initiating downloads is the caller's responsibility. The browser default is
 the multi-target template, explicitly independent of the CLI's single default.
+
+`editor` rejects a `format` field. It returns `{study, rows}` where `study` has
+the existing study-JSON shape and `rows` is an ordered array of seven string
+cells per observation, without the header. The CSV decoder is the MoonBit
+`parse_followup_cells` facade, reusing the existing quoting and newline parser.
+It checks the CSV shape rather than clinical state or precision. Structurally
+invalid study values and invalid observation cells can therefore remain editable.
+Study JSON syntax/schema failures or CSV quoting/header/column failures return
+an input-error envelope with no table result. Source text is never repaired.
 
 ## Response version 1
 
@@ -114,6 +125,12 @@ describe the response variants.
 | Invalid study/CSV input | Requested action | `false` | `input` | Full report | `null` |
 | Valid review/preflight | Requested action | `true` | `null` | Full report | Format/media type/content |
 | Valid template | `template` | `true` | `null` | `null` | `files: [{name, content}]` |
+| Editable input shape | `editor` | `true` | `null` | Full report, possibly `valid: false` | `study`, `rows` |
+
+For `editor`, `ok: true` means the table shape can be edited. It does not mean
+the clinical inputs are valid or evaluable. The caller must gate review on the
+existing preflight/review actions. The workbench blocks generation and printing
+when preflight has errors, and retracts stale outputs immediately after any edit.
 
 For request errors, `diagnostics` contains a `code`, JSON `field` path and
 English `message`. Codes are `request_json`, `request_schema`, `request_version`,
@@ -134,7 +151,7 @@ remain language independent. JSON result content is a string containing the
 existing audit schema; parse it a second time when structured evidence is needed.
 Media types omit a charset; all strings are Unicode and saved files use UTF-8.
 Each call evaluates its complete supplied track and retains no previous track.
-The v1 adapter exposes review, preflight and templates; revision and batch file
+The v1 adapter exposes review, preflight, templates and editor cells; revision and batch file
 workflows continue through their existing APIs/CLI.
 
 ## Verification

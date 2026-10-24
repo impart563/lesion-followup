@@ -57,6 +57,8 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Bundle provenance | Independent Python hashlib comparison, raw-file fingerprints, byte lengths, tampering/missing files/profile/version rejection and read-only verification |
 | Batch workflow | Manifest-relative paths, partial input/I/O failure isolation, matching per-case results, portable IDs and rejection of existing output roots |
 | Browser adapter | Release ES module export, strict versioned requests, templates, stateless calls and byte-identical bilingual CLI reports; exact clinical boundaries, NE gates, Unicode and located input failures |
+| Workbench and drafts | Table/source round trips through the MoonBit CSV decoder, editable invalid values with replay gates, versioned unfinished drafts, exact source hashes and no remote runtime assets |
+| Print preparation | Summary/full documents retain matching inputs and complete evidence links; synthetic 36-visit fixtures exercise long tables, Unicode notes and NE |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
@@ -99,3 +101,35 @@ browser. It displayed one changed observation, three affected visits, week-6
 PR→PD and week-8 PD→NE, with readable before/after measurement and minimum
 columns. Both revisions use synthetic inputs. Calculation-condition tables
 retain the existing report's visit navigation and target-only scope.
+
+## Offline workbench review
+
+On 2026-10-25 the workbench was exercised in the Codex in-app browser
+(Chromium 155.0.0.0, Windows, default desktop viewport). Actual file chooser
+imports loaded the saved study JSON and CSV. Editing week-4 T1 to 10.01 mm
+located the precision error and disabled replay; correcting it to 9.0 mm produced
+PR, PR, PD, NE. The generated CSV and JSON were downloaded and imported again;
+the input fingerprint matched exactly. The redesigned navigation, collapsed
+baseline details, editable observation table, natural Chinese diagnostics,
+report distribution and core-generated sum chart were inspected visually.
+
+Explicit draft save, refresh, manual restore, unsupported-version rejection
+without changing the current report, and clear followed by refresh were checked.
+A portable 36-visit/72-observation draft loaded successfully; filtering the last
+visit showed two observations while the full report retained all 36 visits.
+Both print layouts were previewed inside the page. Print content uses a scoped
+Shadow DOM; local anchor navigation is handled within that same scope.
+
+The in-app browser did not expose a capturable native print dialog, so pagination
+was checked independently using the official portable WeasyPrint 70.0 renderer,
+downloaded from its GitHub release with SHA-256
+`ab1151f210b4e6bb7aa7a79e91a67e8ddb760094c107bfda55241b6aaefe7d53`.
+Small summary/full and long summary/full documents were rendered and visually
+reviewed: 1, 7, 2 and 36 A4 pages respectively. All pages contained text and stayed within the checked page bounds;
+Chinese notes, repeated headings, the final visit and both target plots were
+retained. This rendering check is additional local QA, not a requirement to
+install WeasyPrint for building or running the workbench. CI exercises the
+document contracts and synthetic fixtures with Node, not this optional renderer.
+
+The screenshot in the README shows the workbench with synthetic data. These
+checks establish software behavior and layout only, not clinical validation.

@@ -157,5 +157,13 @@ process.stdout.write(JSON.stringify(results));
     require(responses[-1] == responses[-3], "Repeated calls retained state")
     passed("browser ES module exports, versioned contracts, templates and independent calls")
     passed("browser/native parity: bilingual five-format reports, exact boundaries, NE gates and located errors")
+    workbench = subprocess.run([node, str(ROOT / "scripts/workbench_test.mjs"), str(output)],
+                               input=json.dumps(outputs, ensure_ascii=False), capture_output=True,
+                               encoding="utf-8", env=environment, cwd=str(ROOT), timeout=60)
+    require(workbench.returncode == 0, "Workbench contract tests failed: " + workbench.stderr)
+    workbench_result = json.loads(workbench.stdout)
+    passed("workbench table edits, exact CSV round trips and strict unfinished draft contracts")
+    passed("summary/full print evidence, independent input hashes, long-track fixtures and offline assets")
     return {"node_version": version, "request_count": len(requests), "native_parity_cases": len(variants),
-            "build": "python scripts/build_browser.py", "module": "_build/browser/browser.js"}
+            "build": "python scripts/build_browser.py", "module": "_build/browser/browser.js",
+            "workbench": workbench_result}

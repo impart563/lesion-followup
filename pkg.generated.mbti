@@ -21,6 +21,8 @@ pub fn parse_batch_json(String) -> Result[Array[@io.BatchCase], Array[@io.Diagno
 
 pub fn parse_diameter_mm(String) -> Result[Int, String]
 
+pub fn parse_followup_cells(String) -> Result[Array[Array[String]], Array[@io.Diagnostic]]
+
 pub fn parse_followup_csv(String) -> Result[Array[@visit.Visit], Array[@io.Diagnostic]]
 
 pub fn parse_study_json(String) -> Result[@lesion.Study, Array[@io.Diagnostic]]

@@ -8,6 +8,8 @@ export type BrowserRequest =
   | { schema_version: 1; action: "preflight"; study_json: string; followup_csv: string;
       language?: "en" | "zh-CN"; format?: "json" | "markdown" }
   | { schema_version: 1; action: "template"; template?: "single" | "multi";
+      language?: "en" | "zh-CN" }
+  | { schema_version: 1; action: "editor"; study_json: string; followup_csv: string;
       language?: "en" | "zh-CN" };
 
 export interface ReviewNotice {
@@ -22,15 +24,18 @@ export interface Preflight {
 }
 export interface ReportResult { format: ReportFormat; media_type: string; content: string }
 export interface TemplateResult { files: { name: string; content: string }[] }
+export interface EditorResult { study: Record<string, unknown>; rows: string[][] }
 interface Envelope { schema_version: 1; scope: "target_lesions_only" }
 export type BrowserResponse = Envelope & (
   | { ok: false; action: null; error_kind: "request";
       diagnostics: { code: string; field: string; message: string }[];
       preflight: null; result: null }
-  | { ok: false; action: "review" | "preflight"; error_kind: "input";
+  | { ok: false; action: "review" | "preflight" | "editor"; error_kind: "input";
       diagnostics: []; preflight: Preflight; result: null }
   | { ok: true; action: "review" | "preflight"; error_kind: null;
       diagnostics: []; preflight: Preflight; result: ReportResult }
   | { ok: true; action: "template"; error_kind: null;
       diagnostics: []; preflight: null; result: TemplateResult }
+  | { ok: true; action: "editor"; error_kind: null;
+      diagnostics: []; preflight: Preflight; result: EditorResult }
 );
