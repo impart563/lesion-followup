@@ -1,0 +1,9 @@
+visit_id,date,technique_id,lesion_id,state,diameter_mm,note
+week-2,2026-01-15,ct-venous-5mm,T1,measured,20.0,
+week-2,2026-01-15,ct-venous-5mm,N1,measured,15.0,
+week-4,2026-02-01,ct-other,T1,measured,1.0,
+week-4,2026-02-01,ct-other,N1,measured,9.0,
+week-6,2026-02-15,ct-venous-5mm,T1,measured,10.0,
+week-6,2026-02-15,ct-venous-5mm,N1,measured,10.0,
+week-8,2026-03-01,ct-venous-5mm,T1,measured,15.0,
+week-8,2026-03-01,ct-venous-5mm,N1,measured,10.0,

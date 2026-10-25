@@ -34,6 +34,19 @@ Category cards and ledger rows link to the relevant visit evidence.
 The [Chinese example report](examples/review.zh-CN.html) includes the same
 quantities and categories, translated explanations and individual-target trends.
 
+The [complete review collection](examples/review-cases/README.md) covers multiple
+targets, missing observations, changed acquisition identifiers and revision
+effects, with hand-calculated expectations and importable workbench drafts:
+
+```sh
+python scripts/reproduce_examples.py --output _build/review-examples
+```
+
+Version 0.2.0 candidate packaging, compatibility and installation checks are
+documented in the [release guide](docs/release.md). Windows and Linux CI run the
+same acceptance suite from clean checkouts, including independent consumption of
+the extracted candidate package. Registry publication is recorded separately.
+
 ### Prepare and check inputs
 
 `--init-example NEW_DIRECTORY` creates `study.json`, `followup.csv` and filling

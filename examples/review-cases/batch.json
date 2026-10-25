@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"id": "multi", "study": "../study.json", "input": "../followup.csv"},
+    {"id": "missing", "study": "../study.json", "input": "missing.csv"},
+    {"id": "technique", "study": "../study.json", "input": "technique.csv"},
+    {"id": "revised", "study": "../study.json", "input": "../followup.revised.csv"}
+  ]
+}

@@ -8,6 +8,7 @@ import hashlib
 import io
 import json
 import os
+import platform
 from pathlib import Path
 import re
 import shutil
@@ -19,6 +20,8 @@ from html.parser import HTMLParser
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
 from browser_acceptance import verify_browser
+from distribution import module_version, verify_candidate_consumer
+from reproduce_examples import reproduce
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -267,7 +270,7 @@ def main():
     for args in [("--format", "invalid"), ("--study", "only.json"), ("--scenario", "unknown"), ("--bundle", "b", "--format", "html"), ("--check-input", "--format", "svg"), ("--lang", "invalid"), ("--template", "multi"), ("--init-example", "new", "--check-input"), ("--init-example", "new", "--format", "html"), ("--init-example", "new", "--template", "invalid")]:
         cli(*args, expected=2)
     cli("--help")
-    require(cli("--version").stdout.strip() == "lesion-followup 0.1.0", "version output changed")
+    require(cli("--version").stdout.strip() == "lesion-followup " + module_version(), "version output changed")
     passed("CLI modes, help, version and incompatible arguments")
     with tempfile.TemporaryDirectory(prefix="lesion-followup ") as directory:
         temp = Path(directory)
@@ -304,7 +307,7 @@ def main():
             content = first_files[name["name"]]
             require(name["sha256"] == hashlib.sha256(content).hexdigest(), "bundle SHA-256 differs from Python hashlib")
             require(name["byte_length"] == len(content), "bundle byte length mismatch")
-        require(manifest["schema_version"] == 2 and manifest["software_version"] == "0.1.0", "bundle provenance missing")
+        require(manifest["schema_version"] == 2 and manifest["software_version"] == module_version(), "bundle provenance missing")
         raw_hashes = {item["name"]: item["sha256"] for item in manifest["inputs"] if item["representation"] == "raw_bytes"}
         require(raw_hashes == {"study": hashlib.sha256((ROOT / "examples/study.json").read_bytes()).hexdigest(),
                                "followup": hashlib.sha256((ROOT / "examples/followup.csv").read_bytes()).hexdigest()}, "raw source fingerprint mismatch")
@@ -455,8 +458,14 @@ def main():
         require(any(row["message"] == malicious for row in data_rows), "CSV lost a quoted multiline note")
         passed("untrusted text escaping and multiline CSV round trip")
     browser = verify_browser(run, cli, outputs, chinese_outputs, passed, environment)
+    with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
+        collection = Path(directory) / "复核 示例"
+        examples = reproduce(collection, cli)
+        subprocess.run([shutil.which("node", path=environment["PATH"]), "scripts/example_browser_test.mjs",
+                        "_build/browser/browser.js", str(collection)], cwd=str(ROOT), env=environment, check=True, timeout=180)
+        passed("four hand-calculated importable examples, 20 browser/native formats, revision and batch")
     run(["package"])
-    package_path = ROOT / "_build" / "publish" / "impart563-lesion-followup-0.1.0.zip"
+    package_path = ROOT / "_build" / "publish" / ("impart563-lesion-followup-" + module_version() + ".zip")
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
@@ -464,11 +473,15 @@ def main():
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
+    candidate_consumer = verify_candidate_consumer(package_path, moon, environment)
+    passed("independent extracted-candidate consumer on four backends")
     fingerprint, source_files = source_digest()
     record = {
         "status": "passed",
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
-        "module": "impart563/lesion-followup@0.1.0",
+        "module": "impart563/lesion-followup@" + module_version(),
+        "platform": {"system": platform.system(), "machine": platform.machine()},
+        "github_actions": {key: os.environ.get(key) for key in ("GITHUB_SHA", "GITHUB_RUN_ID", "RUNNER_OS")},
         "scope": "software acceptance using synthetic data; not clinical validation",
         "source_sha256": fingerprint,
         "source_file_count": source_files,
@@ -477,6 +490,8 @@ def main():
         "python_version": __import__("sys").version.split()[0],
         "unit_tests": test_counts,
         "browser_adapter": browser,
+        "example_collection": examples,
+        "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,
         "scenario_summaries": scenario_summaries,
         "file_input_summary": report["summary"],

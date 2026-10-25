@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — release candidate, 2026-10-25
+
+- Added a reproducible four-case collection with hand-calculated expectations,
+  importable workbench drafts, revision evidence and matching batch results.
+- Added Windows 2022 and Ubuntu 24.04 clean-checkout CI, including Unicode paths,
+  browser HTTP entry checks and preserved per-platform acceptance records.
+- Added extracted-package consumer checks on all four supported backends and a
+  clean-commit release-candidate builder with source, browser and module archives,
+  SHA-256 checksums and a publication-state manifest.
+- Documented version compatibility, input contracts and separate candidate,
+  GitHub Release and Mooncakes publication steps. Candidate preparation does not
+  imply registry availability.
 
 - Add an offline browser workbench for paired input import, baseline/observation
   editing, located diagnostics, five-format export and current-report review.

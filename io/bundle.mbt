@@ -59,7 +59,7 @@ pub fn render_bundle_manifest(
   let document : Json = {
     "schema_version": 2,
     "software": "impart563/lesion-followup",
-    "software_version": "0.1.0",
+    "software_version": "0.2.0",
     "ruleset": "recist-1.1-target-subset-1",
     "scope": "target_lesions_only",
     "language": tr(language, "en", "zh-CN"),
@@ -103,7 +103,7 @@ fn verify_manifest(
   for
     (key, expected) in [
       ("software", "impart563/lesion-followup"),
-      ("software_version", "0.1.0"),
+      ("software_version", "0.2.0"),
       ("ruleset", "recist-1.1-target-subset-1"),
       ("scope", "target_lesions_only"),
     ] {

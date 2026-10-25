@@ -6,6 +6,11 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import functools
+import http.server
+import socketserver
+import threading
+import urllib.request
 
 from build_browser import package_browser
 
@@ -17,12 +22,38 @@ def require(condition, message):
         raise AssertionError(message)
 
 
+def verify_http_entry(output):
+    class QuietHandler(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+    handler = functools.partial(QuietHandler, directory=str(output))
+    # These checks are strictly loopback; avoid OS proxy/DNS settings for localhost.
+    local_http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with socketserver.TCPServer(("127.0.0.1", 0), handler) as server:
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            for name, expected_type in (("index.html", "text/html"), ("smoke.html", "text/html"),
+                                        ("browser.js", "javascript"), ("app.mjs", "javascript"),
+                                        ("workbench.mjs", "javascript"), ("workbench.css", "text/css")):
+                url = "http://127.0.0.1:{}/{}".format(server.server_address[1], name)
+                with local_http.open(url, timeout=10) as response:
+                    require(expected_type in response.headers["Content-Type"], "wrong runtime MIME type: " + name)
+                    require(response.read() == (output / name).read_bytes(), "served runtime differs: " + name)
+        finally:
+            server.shutdown()
+            worker.join(timeout=10)
+
+
 def verify_browser(run, cli, outputs, chinese_outputs, passed, environment):
     node = shutil.which("node", path=environment["PATH"])
     require(node is not None, "Node.js is required for browser acceptance")
     version = subprocess.run([node, "--version"], capture_output=True, text=True, check=True).stdout.strip()
     run(["build", "--target", "js", "--release", "--deny-warn", "browser"])
     output = package_browser()
+    verify_http_entry(output)
+    passed("localhost browser entry, ES-module MIME types and exact runtime assets")
     requests, expectations = [], []
 
     def add(request, expected):

@@ -1,0 +1,62 @@
+# 0.2.0 发布准备与接入
+
+0.2.0 汇总输入准备、复核追溯、离线工作区及完整示例集。本仓库当前准备 `v0.2.0-rc.1` 发布候选。模块内版本为 `0.2.0`，候选标识写入归档名称和发布清单。
+
+## 兼容范围
+
+| 契约 | 0.2.0 状态 |
+| --- | --- |
+| MoonBit | 固定编译器 `0.10.14+7d59c7ec9`，Moon CLI `0.1.20260920`；四后端为 wasm、wasm-gc、js、native |
+| 根包门面 | 保留原有导入路径 `impart563/lesion-followup`；新增接口可查生成的 `pkg.generated.mbti`；库不读写文件 |
+| 原始输入 | 研究 JSON v1、随访 CSV 七列保持不变；尺寸用最多一位小数的字符串，内部单位为 0.1 mm，不舍入 |
+| 审计 JSON / CSV | JSON schema v1，保留原字段并增加逐条件证据；应按字段名读取并允许已文档化的附加字段 |
+| 报告包清单 | v2，含软件版本、规则版本及输入/产物摘要；校验器拒绝未知版本，旧清单需用原始输入重新生成 |
+| 浏览器 / 草稿 | 请求 v1、草稿 v1；未知字段或版本按各自严格契约拒绝；原始 JSON/CSV 可跨入口使用 |
+| 医学语义 | 沿用 `recist-1.1-target-subset-1`；NE、最低值和上下文门限保持已有语义；详见[规则及限制](rule-semantics.md) |
+
+HTML、Markdown 与中文提示为展示层，不适合作为解析接口。机器字段及稳定诊断代码用于程序接入。此版本未宣称对未来工具链的兼容性。
+
+## 从源码使用
+
+```sh
+moon update
+python scripts/acceptance.py
+python scripts/reproduce_examples.py --output _build/review-examples
+python scripts/build_browser.py
+python -m http.server 8765 --bind 127.0.0.1
+```
+
+打开 `http://127.0.0.1:8765/_build/browser/`，选择导入示例原始文件或生成的 `draft.json`。静态服务器仅提供本地资源，计算在浏览器内完成。CLI 命令、输入及退出码见 [README](../README.md)；浏览器请求见[适配契约](browser-adapter.md)；具体操作见[工作区说明](workbench.md)。
+
+库使用者可先在 `moon.work` 中引用本地模块，参考独立模块 [`examples/downstream-consumer`](../examples/downstream-consumer/)。验收还会解压 `moon package` 的实际归档，在临时目录建立新的消费模块，四后端运行相同的公开接口示例。该检查不链接原仓库库源码；它验证候选包的完整性。依赖 `moonbitlang/async@0.19.4` 仍按正常 registry 机制解析。
+
+## 生成候选包
+
+先运行完整验收并提交源码和验收记录。脚本要求工作树干净，且验收指纹与源码一致：
+
+```sh
+python scripts/acceptance.py --record docs/acceptance-results.json
+# Review and commit the accepted tree before the next command.
+python scripts/build_release.py --output _build/release
+```
+
+输出目录必须尚不存在。候选内容包括：
+
+- `impart563-lesion-followup-0.2.0.zip`：Mooncakes 候选模块，已经解压消费验证。
+- `lesion-followup-0.2.0-rc.1-source.zip`：对应 Git 提交的源码，可运行验收。
+- `lesion-followup-0.2.0-rc.1-browser.zip`：可由普通静态服务器提供的完整工作区，无需重新编译。
+- `release-manifest.json` 与 `SHA256SUMS`：提交、验收指纹、归档字节数与摘要，以及实际发布状态。
+
+浏览器包解压后，在该目录启动本地静态服务器并打开根路径。需支持 ES modules、Web Crypto 和本地文件选择的现代浏览器；不能直接双击 `index.html` 代替 HTTP 入口。浏览器内导出和本地草稿的限制见工作区说明。
+
+## 发布状态与正式发布步骤
+
+候选包、GitHub Release、Mooncakes 发布和发布后 registry 安装是四个独立记录项。`build_release.py` 只构建候选，不推送标签、不发布 Release、不上传 registry。GitHub 的 draft Release 仅仓库有权限者可见，也不等于正式发布。
+
+正式发布时，应先核对本次提交对应的 Windows / Linux CI 证据、`SHA256SUMS` 和候选说明。GitHub Release 需附上候选文件及对应提交；registry 发布须由拥有 `impart563` 命名空间的 Mooncakes 账号登录，再从该已验收版本运行 `moon publish`。GitHub 登录与 Mooncakes 登录分别核实，不能相互替代。
+
+只有 registry 返回成功且能从新目录解析 `impart563/lesion-followup@0.2.0`，再执行独立模块的编译及运行后，才记录“已发布、可安装”及实际地址。未完成前，本地 workspace 消费与候选包验证均不能称作 registry 安装成功。
+
+全部演示输入为合成数据，仅供人工 CT 靶病灶的软件复核，不代表整体疗效、治疗建议或临床验证。
+
+工具链及发布命令以[本机 `moon --help` 对应的官方手册](https://github.com/moonbitlang/moon/blob/main/docs/manual/src/commands.md)为参考；[官方安装入口](https://www.moonbitlang.com/download/)提供各平台安装方式。本项目验收以仓库记录的固定工具链为准。

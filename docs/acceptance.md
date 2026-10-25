@@ -35,6 +35,21 @@ On Linux or macOS, install the same release with:
 curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- '0.10.14+7d59c7ec9'
 ```
 
+On Windows, use the official PowerShell installer with the same pin:
+
+```powershell
+$env:MOONBIT_INSTALL_VERSION = '0.10.14+7d59c7ec9'
+Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
+```
+
+CI uses clean `windows-2022` and `ubuntu-24.04` runners, Python 3.12 and Node 22.
+Both check out into a path containing spaces and Chinese characters, then run the
+same script without restored build/dependency caches. The Windows image provides
+Visual Studio native build tools. Each job uploads its actual platform record,
+compiled browser entry and candidate module archive. The record includes runner
+OS, commit and run ID; source fingerprints normalize CRLF to LF. HTTP entry checks
+verify MIME types and exact runtime bytes; they do not claim GUI-browser tests.
+
 When upgrading MoonBit, review formatter and public-interface changes and rerun
 the complete acceptance script before updating the CI pin and saved result.
 Fresh installations need `moon update` once before running checks so that the
@@ -59,6 +74,8 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Browser adapter | Release ES module export, strict versioned requests, templates, stateless calls and byte-identical bilingual CLI reports; exact clinical boundaries, NE gates, Unicode and located input failures |
 | Workbench and drafts | Table/source round trips through the MoonBit CSV decoder, editable invalid values with replay gates, versioned unfinished drafts, exact source hashes and no remote runtime assets |
 | Print preparation | Summary/full documents retain matching inputs and complete evidence links; synthetic 36-visit fixtures exercise long tables, Unicode notes and NE |
+| Complete examples | Four hand-calculated tracks, twenty browser/native format comparisons, importable drafts, revision and matching batch outputs |
+| Candidate consumption | A separate temporary consumer reads the extracted module archive, and runs on wasm, wasm-gc, js and native without linking the checkout library |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
@@ -83,6 +100,20 @@ The saved example HTML has also been inspected in a browser, including category
 card navigation to the corresponding visit evidence. All numeric scenarios and
 input fixtures are synthetic. This is software acceptance, not clinical,
 regulatory, imaging-reader or diagnostic validation.
+
+## Complete collection and candidate checks
+
+On 2026-10-25, the `missing/draft.json` produced by the unified collection script
+was imported through the actual local workbench file chooser. The report showed
+two PR, one PD and one NE; the latest eligible minimum was 20.0 mm from week-6.
+The missing visit remained a gap and the page retained its manual-review state.
+See [the actual page capture](review-examples.jpg). This is a desktop import and
+report check; the twenty automated format comparisons cover all four tracks.
+
+The module version is now 0.2.0. Saved report previews were regenerated for the
+version footer; medical categories and numerical expectations were not changed.
+See [candidate preparation and publication states](release.md) for the separate
+archive, clean-directory consumption and registry-installation meanings.
 
 ## Input and report usability preview
 

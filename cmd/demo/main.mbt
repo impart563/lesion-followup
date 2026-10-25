@@ -218,7 +218,7 @@ async fn main {
     return
   }
   if args == ["--version"] {
-    @stdio.stdout.write("lesion-followup 0.1.0\n")
+    @stdio.stdout.write("lesion-followup 0.2.0\n")
     return
   }
   let options = match parse_args(args) {

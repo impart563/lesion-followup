@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "scope": "target_lesions_only",
+  "basis": "Hand-calculated checks; see README.md. Values are millimetres. No clinical validation.",
+  "cases": [
+    {"id": "multi", "study": "../study.json", "input": "../followup.csv", "expected": [
+      {"visit_id": "week-2", "sum_mm": "35.0", "prior_nadir_mm": "50.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-4", "sum_mm": "20.0", "prior_nadir_mm": "35.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-6", "sum_mm": "24.0", "prior_nadir_mm": "20.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-8", "sum_mm": "25.0", "prior_nadir_mm": "20.0", "target_response": "PD", "finding": "target_pd"}
+    ]},
+    {"id": "missing", "study": "../study.json", "input": "missing.csv", "expected": [
+      {"visit_id": "week-2", "sum_mm": "35.0", "prior_nadir_mm": "50.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-4", "sum_mm": null, "prior_nadir_mm": "35.0", "target_response": "NE", "finding": "missing_measurement"},
+      {"visit_id": "week-6", "sum_mm": "20.0", "prior_nadir_mm": "35.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-8", "sum_mm": "25.0", "prior_nadir_mm": "20.0", "target_response": "PD", "finding": "target_pd"}
+    ]},
+    {"id": "technique", "study": "../study.json", "input": "technique.csv", "expected": [
+      {"visit_id": "week-2", "sum_mm": "35.0", "prior_nadir_mm": "50.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-4", "sum_mm": "10.0", "prior_nadir_mm": "35.0", "target_response": "NE", "finding": "technique_mismatch"},
+      {"visit_id": "week-6", "sum_mm": "20.0", "prior_nadir_mm": "35.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-8", "sum_mm": "25.0", "prior_nadir_mm": "20.0", "target_response": "PD", "finding": "target_pd"}
+    ]},
+    {"id": "revised", "study": "../study.json", "input": "../followup.revised.csv", "expected": [
+      {"visit_id": "week-2", "sum_mm": "35.0", "prior_nadir_mm": "50.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-4", "sum_mm": "19.0", "prior_nadir_mm": "35.0", "target_response": "PR", "finding": "target_pr"},
+      {"visit_id": "week-6", "sum_mm": "24.0", "prior_nadir_mm": "19.0", "target_response": "PD", "finding": "target_pd"},
+      {"visit_id": "week-8", "sum_mm": "25.0", "prior_nadir_mm": "19.0", "target_response": "NE", "finding": "track_requires_review"}
+    ]}
+  ]
+}
