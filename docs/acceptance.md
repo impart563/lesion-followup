@@ -211,3 +211,39 @@ DEFLATE ZIP with data descriptors passed in the actual browser as well.
 The workbench layout was visually checked at the existing 781 × 742 viewport.
 No mobile viewport or native print dialog check is claimed for this batch. The
 unified CI suite checks transports and data contracts without GUI automation.
+
+## Human review record acceptance
+
+The unified suite also runs `review_notes_acceptance.py`. Five native
+preflights, including a synthetic three-hint NE record, are compared against the
+manual checklist's original messages and locations. Independent Python and Node
+SHA-256 checks verify the portable payload and exact source-pair binding. Note
+edits are checked against unchanged core preflight and audit results. Strict
+field/version/status/time validation, text/file/item limits, reordered JSON
+keys, input mismatch, a recomputed digest with forged hints, zero-hint records
+and backward device clocks are covered without changing clinical expectations.
+
+Four bilingual HTML/Markdown exports retain pending items, original hints and
+the input fingerprint. Untrusted HTML, link syntax, heading markers, Unicode
+and code fences stay literal. In additional local QA, markdown-it-py 3.0.0 with
+CommonMark and raw HTML enabled rendered both Markdown variants without active
+user content or injected headings. This optional renderer is not a build or CI
+dependency; CI checks document contracts and HTML with the standard library.
+
+On 2026-10-25 the Windows in-app browser loaded the synthetic three-hint
+session, recorded one viewed item plus multiline notes, and filtered the two
+pending items. The core hint badge remained three and replay retained NE.
+Explicit save, refresh, loading the original session and restoring local notes
+retained viewing states and comments. Actual JSON export/reimport, corrupt and
+wrong-input rejection, and local-copy clearing without losing in-memory notes
+were exercised. Editing input made the old snapshot read-only and disabled
+current HTML/Markdown export while keeping a byte-identical JSON backup;
+restoring the exact source pair re-enabled the existing snapshot. The zero-hint
+template displayed an empty checklist with an editable round summary.
+
+The downloaded JSON payload was independently hashed with Python; its original
+input fingerprint matched the saved session. Actual HTML and Markdown downloads
+retained comments, all three hints and the one-viewed/two-pending counts. The
+workbench was visually checked at 781 × 797, and the independent explanation
+HTML at 1265 × 712. No mobile viewport or native print-dialog check is claimed.
+These checks establish software workflow and transport behavior only.

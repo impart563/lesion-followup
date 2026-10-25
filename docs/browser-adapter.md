@@ -222,6 +222,16 @@ extracting files to disk. Its limits and supported layout are described in the
 DEFLATE decoding uses the standard
 [Compression Streams API](https://compression.spec.whatwg.org/).
 
+## Human review note boundary
+
+The workbench's manual checklist consumes the existing `editor` preflight's
+`review_hints`. No browser action or clinical rule is added for annotations.
+Viewing states and comments belong to the presentation layer, remain bound to
+the raw source pair, and do not alter MoonBit findings or categories. Their
+separate strict JSON and HTML/Markdown contracts are described in
+[human review notes](review-notes.md). Existing report, bundle, draft and session
+formats remain unchanged.
+
 ## Verification
 
 ```sh

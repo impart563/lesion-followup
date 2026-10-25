@@ -52,7 +52,9 @@ examples, fixed-reference revision comparison and portable two-version review
 sessions. See the [workbench guide](docs/workbench.md) for saving both original
 source pairs and restoring them for a fresh comparison. Saved sessions can be
 reviewed as an independent batch, exported as native-compatible report ZIPs and
-checked again through the browser's bundle-integrity view.
+checked again through the browser's bundle-integrity view. A separate human-review
+checklist retains viewing states and comments, with input-bound note files and
+independent HTML/Markdown explanations; core findings and categories stay intact.
 
 ### Prepare and check inputs
 

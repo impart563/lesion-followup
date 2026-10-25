@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add a manual review checklist preserving core hints while tracking human
+  viewing states, per-item comments and a round-level summary.
+- Add explicit local and portable note persistence with strict schemas,
+  independent SHA-256 verification and current-input/core-hint binding.
+- Add bilingual standalone HTML/Markdown review explanations, with pending
+  work preserved and stale snapshots kept read-only for JSON backup.
+
 - Add independent browser batch review of portable sessions, per-case failures,
   explicit record opening and native-rendered report indexes.
 - Add deterministic ZIP delivery for current and batch reports, with five-file

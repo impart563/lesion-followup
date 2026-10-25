@@ -2,12 +2,14 @@ import { COLUMNS, DRAFT_KEY, invoke, serializeTable, rowLocations, makeDraft, re
 import { examples } from "./examples.mjs";
 import { createBundle, reviewBatch, batchZip, verifyArchive } from "./delivery.mjs";
 import { writeZip, ZIP_LIMITS } from "./archive.mjs";
+import { mountReviewNotes } from "./review-notes-ui.mjs";
 
 const $ = id => document.getElementById(id);
 const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
 const inputNames = ["随访编号", "日期", "采集标识", "病灶编号", "观察状态", "直径 mm", "读片者说明"];
 const stateNames = { measured: "已测量", absent: "已消失", too_small: "过小，无法可靠测量", missing: "未测量", not_evaluable: "无法评价" };
 const urls = [];
+let reviewNotesController = null;
 let batchResult = null, batchToken = 0, batchRunning = false, archiveToken = 0, archiveRunning = false;
 const printShadow = $("print-render").attachShadow({ mode: "open" });
 printShadow.addEventListener("click", event => {
@@ -29,7 +31,7 @@ function bind(id, handler) {
 }
 
 function showView(name) {
-  const names = { records: "测量记录", quality: "记录核查", report: "复核报告", compare: "修订对比", batch: "批量与交付", draft: "草稿" };
+  const names = { records: "测量记录", quality: "记录核查", notes: "人工核查", report: "复核报告", compare: "修订对比", batch: "批量与交付", draft: "草稿" };
   document.querySelectorAll("[data-panel]").forEach(el => { el.hidden = el.dataset.panel !== name; });
   document.querySelectorAll(".workspace-nav [data-view]").forEach(el => {
     el.classList.toggle("active", el.dataset.view === name);
@@ -114,6 +116,7 @@ function updateButtons() {
   $("verify-archive").disabled = !ready || archiveRunning || !$("archive-file").files.length;
   updateBaseline();
   updateContext();
+  reviewNotesController?.refresh();
 }
 
 function discardReport() {
@@ -543,6 +546,10 @@ bind("verify-archive", async () => {
   } catch (error) { if (token === archiveToken) $("archive-status").textContent = "核查未完成：" + error.message; }
   finally { if (token === archiveToken) { archiveRunning = false; updateButtons(); } }
 });
+
+reviewNotesController = mountReviewNotes({ getEvaluate: () => state.evaluate, getSources: source,
+  getQuality: () => state.quality, getLanguage: () => $("language").value, getBusy: () => state.busy,
+  noticeText, download, notify: message });
 
 window.addEventListener("pagehide", () => urls.forEach(url => URL.revokeObjectURL(url)));
 
