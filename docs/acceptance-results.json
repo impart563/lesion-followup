@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-25T05:15:24.088028+00:00",
+  "checked_at_utc": "2026-10-25T09:49:24.077451+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,8 +12,8 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "3755816d5df0afe6215f028229482ef392f4ed48841c12939f449f35e46c5104",
-  "source_file_count": 119,
+  "source_sha256": "136533c1527f6e3b1a77de37ca17a264576e257504e0f32a7d46b68de6f212fa",
+  "source_file_count": 124,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -89,6 +89,22 @@
       "new adapter actions retain strict per-action request contracts"
     ],
     "native_verified_exported_bundles": 3
+  },
+  "review_notes": {
+    "status": "passed",
+    "native_preflight_cases": 5,
+    "bilingual_documents": 4,
+    "hint_count": 3,
+    "independent_node_payload_hash": true,
+    "checks": [
+      "five native preflights retain every hint, location and exact source fingerprint",
+      "viewing statuses and notes do not mutate source pairs, core hints or clinical results",
+      "portable notes verify independent hashes, raw-text binding and recomputed native hint identity",
+      "strict fields, timestamps, statuses, lengths and monotonic local modification times",
+      "zero-hint records retain an independent summary without inventing findings",
+      "bilingual documents retain pending work, literal notes and scope without active content"
+    ],
+    "independent_python_payload_hash": true
   },
   "example_collection": {
     "status": "passed",
@@ -210,6 +226,9 @@
     "browser batch: mixed sessions, independent failures, valid NE, cancellation and core index rendering",
     "browser ZIP delivery: bilingual native bytes, Python stored/DEFLATE/streamed import and native export verification",
     "browser archive integrity: tamper/missing/profile rejection, CRC, paths, duplicate entries and bounded decoding",
+    "human review: native hint parity, independent viewing states, source binding and unchanged clinical evidence",
+    "review note persistence: strict version/hash/context, malformed records, limits and backward clock handling",
+    "review note documents: bilingual HTML/Markdown, pending items, literal untrusted text and matching fingerprints",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends"
@@ -268,7 +287,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 219,
+  "command_count": 224,
   "commands": [
     {
       "command": "moon version --all",
@@ -1182,6 +1201,31 @@
     },
     {
       "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/browser-batch.zip-1 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input <temporary>/multiple-hints.csv --check-input --format json",
       "cwd": ".",
       "exit_code": 0
     },
