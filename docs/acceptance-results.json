@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-25T04:47:21.897814+00:00",
+  "checked_at_utc": "2026-10-25T05:15:24.088028+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,30 +12,30 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "3eeead251d272e4ded64b2be02a462c3f1e8b022a8d8cbcd92f1cdb7bb990d44",
-  "source_file_count": 113,
+  "source_sha256": "3755816d5df0afe6215f028229482ef392f4ed48841c12939f449f35e46c5104",
+  "source_file_count": 119,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
   "unit_tests": {
     "wasm": {
-      "total": 55,
-      "passed": 55,
+      "total": 58,
+      "passed": 58,
       "failed": 0
     },
     "wasm-gc": {
-      "total": 55,
-      "passed": 55,
+      "total": 58,
+      "passed": 58,
       "failed": 0
     },
     "js": {
-      "total": 55,
-      "passed": 55,
+      "total": 58,
+      "passed": 58,
       "failed": 0
     },
     "native": {
-      "total": 59,
-      "passed": 59,
+      "total": 62,
+      "passed": 62,
       "failed": 0
     }
   },
@@ -71,6 +71,24 @@
     ],
     "native_format_comparisons": 24,
     "bundled_examples": 4
+  },
+  "browser_delivery": {
+    "status": "passed",
+    "native_bundle_file_comparisons": 20,
+    "independent_zip_fixtures": 3,
+    "rejected_independent_zip_fixtures": 7,
+    "mixed_batch_cases": 5,
+    "checks": [
+      "four bilingual LF/Unicode-CRLF native bundles match all five files byte for byte",
+      "independent Python stored, deflated and data-descriptor ZIPs with UTF-8 names and directory entries",
+      "independent unsafe paths, case/Unicode collisions, invalid UTF-8, symlink/ZIP64 and underdeclared DEFLATE rejection",
+      "mixed batch isolates corrupt/clinical/read failures, preserves both source pairs and accepts NE",
+      "selection cancellation and explicit case/size limits",
+      "core rejects changed artifacts, missing files/manifest, unsupported profile and extra files independently",
+      "CRC/truncation/header/path/duplicate/size rejection and strict UTF-8 transport",
+      "new adapter actions retain strict per-action request contracts"
+    ],
+    "native_verified_exported_bundles": 3
   },
   "example_collection": {
     "status": "passed",
@@ -189,6 +207,9 @@
     "summary/full print evidence, independent input hashes, long-track fixtures and offline assets",
     "browser revisions: bilingual native parity, exact source pairs, independent diagnostics and baseline guards",
     "portable review sessions: independent hashes, unfinished inputs, tamper rejection and restored evidence",
+    "browser batch: mixed sessions, independent failures, valid NE, cancellation and core index rendering",
+    "browser ZIP delivery: bilingual native bytes, Python stored/DEFLATE/streamed import and native export verification",
+    "browser archive integrity: tamper/missing/profile rejection, CRC, paths, duplicate entries and bounded decoding",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends"
@@ -247,7 +268,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 212,
+  "command_count": 219,
   "commands": [
     {
       "command": "moon version --all",
@@ -1126,6 +1147,41 @@
     },
     {
       "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --bundle <temporary>/lf-en --lang en",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --bundle <temporary>/lf-zh-CN --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --bundle <temporary>/unicode-crlf-en --lang en",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --bundle <temporary>/unicode-crlf-zh-CN --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/browser-bundle.zip-0 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/browser-batch.zip-0 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/browser-batch.zip-1 --format json",
       "cwd": ".",
       "exit_code": 0
     },
