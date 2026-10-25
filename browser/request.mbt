@@ -13,6 +13,9 @@ priv struct Request {
   template : String
   compare_study_json : String
   compare_followup_csv : String
+  manifest : String
+  files : Array[(String, String)]
+  batch_results : Array[@lib.BatchResult]
 }
 
 ///|
@@ -51,16 +54,21 @@ fn decode_request(text : String) -> Request raise RequestError {
     )
   }
   let action = string_field(fields, "action")
-  guard ["review", "preflight", "template", "editor", "compare"].contains(
-    action,
-  ) else {
+  guard [
+    "review", "preflight", "template", "editor", "compare", "bundle", "verify-bundle",
+    "batch-index",
+  ].contains(action) else {
     raise RequestError(
-      "request_action", "$.action", "Use review, preflight, template, editor or compare.",
+      "request_action", "$.action", "Unsupported browser action.",
     )
   }
-  let keys = if action == "template" {
+  let keys = if action == "verify-bundle" {
+    ["schema_version", "action", "manifest", "files"]
+  } else if action == "batch-index" {
+    ["schema_version", "action", "language", "cases"]
+  } else if action == "template" {
     ["schema_version", "action", "language", "template"]
-  } else if action == "editor" {
+  } else if action == "editor" || action == "bundle" {
     ["schema_version", "action", "language", "study_json", "followup_csv"]
   } else if action == "compare" {
     [
@@ -99,7 +107,9 @@ fn decode_request(text : String) -> Request raise RequestError {
   } else {
     ""
   }
-  let format = if action == "template" || action == "editor" {
+  let format = if [
+      "template", "editor", "bundle", "verify-bundle", "batch-index",
+    ].contains(action) {
     ""
   } else {
     let format = string_field(fields, "format", default="json")
@@ -122,6 +132,21 @@ fn decode_request(text : String) -> Request raise RequestError {
     language,
     format,
     template,
+    manifest: if action == "verify-bundle" {
+      string_field(fields, "manifest")
+    } else {
+      ""
+    },
+    files: if action == "verify-bundle" {
+      decode_bundle_files(fields)
+    } else {
+      []
+    },
+    batch_results: if action == "batch-index" {
+      decode_batch_results(fields)
+    } else {
+      []
+    },
     compare_study_json: if action == "compare" {
       string_field(fields, "compare_study_json")
     } else {
@@ -132,12 +157,14 @@ fn decode_request(text : String) -> Request raise RequestError {
     } else {
       ""
     },
-    study_json: if action == "template" {
+    study_json: if ["template", "verify-bundle", "batch-index"].contains(action) {
       ""
     } else {
       string_field(fields, "study_json")
     },
-    followup_csv: if action == "template" {
+    followup_csv: if ["template", "verify-bundle", "batch-index"].contains(
+        action,
+      ) {
       ""
     } else {
       string_field(fields, "followup_csv")

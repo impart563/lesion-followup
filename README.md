@@ -50,7 +50,9 @@ the extracted candidate package. Registry publication is recorded separately.
 The current workbench also provides direct selection of the complete synthetic
 examples, fixed-reference revision comparison and portable two-version review
 sessions. See the [workbench guide](docs/workbench.md) for saving both original
-source pairs and restoring them for a fresh comparison.
+source pairs and restoring them for a fresh comparison. Saved sessions can be
+reviewed as an independent batch, exported as native-compatible report ZIPs and
+checked again through the browser's bundle-integrity view.
 
 ### Prepare and check inputs
 
@@ -252,7 +254,8 @@ reports. Explicit local/portable drafts preserve unfinished records; summary and
 full-evidence layouts support A4 printing and standalone HTML export.
 
 The versioned JSON boundary supports review, preflight, templates and editable
-text cells, using the existing MoonBit core. Input errors retain source locations;
+text cells, revision comparison, report bundles, bundle validation and batch
+indexes, using the existing MoonBit core. Input errors retain source locations;
 valid NE observations remain successful evaluations. The adapter itself has no
 file, network or storage access. Browser-side file selection, downloads and
 explicit draft persistence belong to the workbench.

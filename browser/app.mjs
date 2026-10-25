@@ -1,11 +1,14 @@
 import { COLUMNS, DRAFT_KEY, invoke, serializeTable, rowLocations, makeDraft, readDraft, createReview, createComparison, makeSession, readSession, printDocument, printFragment, escapeHtml as esc } from "./workbench.mjs";
 import { examples } from "./examples.mjs";
+import { createBundle, reviewBatch, batchZip, verifyArchive } from "./delivery.mjs";
+import { writeZip, ZIP_LIMITS } from "./archive.mjs";
 
 const $ = id => document.getElementById(id);
 const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
 const inputNames = ["随访编号", "日期", "采集标识", "病灶编号", "观察状态", "直径 mm", "读片者说明"];
 const stateNames = { measured: "已测量", absent: "已消失", too_small: "过小，无法可靠测量", missing: "未测量", not_evaluable: "无法评价" };
 const urls = [];
+let batchResult = null, batchToken = 0, batchRunning = false, archiveToken = 0, archiveRunning = false;
 const printShadow = $("print-render").attachShadow({ mode: "open" });
 printShadow.addEventListener("click", event => {
   const link = event.target.closest?.('a[href^="#"]');
@@ -26,7 +29,7 @@ function bind(id, handler) {
 }
 
 function showView(name) {
-  const names = { records: "测量记录", quality: "记录核查", report: "复核报告", compare: "修订对比", draft: "草稿" };
+  const names = { records: "测量记录", quality: "记录核查", report: "复核报告", compare: "修订对比", batch: "批量与交付", draft: "草稿" };
   document.querySelectorAll("[data-panel]").forEach(el => { el.hidden = el.dataset.panel !== name; });
   document.querySelectorAll(".workspace-nav [data-view]").forEach(el => {
     el.classList.toggle("active", el.dataset.view === name);
@@ -106,6 +109,9 @@ function updateButtons() {
   $("export-comparison").disabled = !state.comparison || state.busy;
   $("export-session").disabled = !ready || state.busy || !(source().study_json || source().followup_csv);
   $("import-session").disabled = !ready || state.busy;
+  $("export-bundle").disabled = !state.report || state.busy;
+  $("run-batch").disabled = !ready || batchRunning || !$("batch-files").files.length;
+  $("verify-archive").disabled = !ready || archiveRunning || !$("archive-file").files.length;
   updateBaseline();
   updateContext();
 }
@@ -260,7 +266,7 @@ function replaceSources(sources, before = null) {
 }
 
 function download(name, content, type = "text/plain") {
-  const url = URL.createObjectURL(new Blob([content], { type: type + ";charset=utf-8" })); urls.push(url);
+  const url = URL.createObjectURL(new Blob([content], { type: type + (type === "application/zip" ? "" : ";charset=utf-8") })); urls.push(url);
   const link = document.createElement("a"); link.href = url; link.download = name; link.click();
 }
 
@@ -341,6 +347,12 @@ bind("export-report", () => {
   const format = $("report-format").value;
   const extensions = { html: "html", json: "json", csv: "csv", markdown: "md", svg: "svg" };
   download("target-review." + extensions[format], state.report.outputs[format]);
+});
+bind("export-bundle", () => {
+  if (!state.report || state.busy) throw new Error("请先生成当前报告。");
+  const bundle = createBundle(state.evaluate, source(), $("language").value);
+  download("target-review-bundle.zip", writeZip(bundle.files), "application/zip");
+  message("报告包已导出，包含报告、审计记录、曲线与完整性清单。");
 });
 for (const mode of ["summary", "full"]) bind("print-" + mode, () => {
   if (!state.report) throw new Error("请先生成当前报告。");
@@ -467,6 +479,69 @@ bind("import-session", async () => {
     $("input-status").textContent = file.name;
     message("会话已载入，请重新比较或生成报告，以核对当前记录。");
   } finally { state.busy = false; updateButtons(); }
+});
+
+function batchDetail(row) {
+  return row.quality ? [...row.quality.diagnostics, ...row.quality.input_issues].map(issue =>
+    `${issue.line ? `第 ${issue.line} 行 · ` : ""}${noticeText(issue)}（${issue.code}）`).join("；") : row.detail;
+}
+function renderBatch(rows) {
+  $("batch-results").innerHTML = rows.map(row => `<article class="batch-row"><div class="batch-row-heading"><strong>${esc(row.name)}</strong><span class="batch-state ${row.status === "success" ? "passed" : "failed"}">${row.status === "success" ? "已生成" : row.status === "io_error" ? "读取失败" : "待修正"}</span></div><p>${esc(row.id)} · ${row.visit_count} 次随访 · ${row.review_hint_count} 项人工核查提示</p>${row.status !== "success" ? `<p class="batch-detail">${esc(batchDetail(row))}</p>` : ""}<div class="actions">${row.session ? `<button class="quiet" data-open-case="${row.id}" ${batchResult ? "" : "disabled"}>打开记录</button>` : ""}${row.bundle ? `<button class="secondary" data-zip-case="${row.id}" ${batchResult ? "" : "disabled"}>下载报告包</button>` : ""}</div></article>`).join("");
+}
+$("batch-files").addEventListener("change", () => {
+  batchToken++; batchRunning = false; batchResult = null;
+  $("batch-results").replaceChildren(); $("download-batch").disabled = true; $("download-index").disabled = true;
+  $("batch-progress").value = 0;
+  $("batch-status").textContent = `已选择 ${$("batch-files").files.length} 份会话，点击开始逐份核查。`;
+  updateButtons();
+});
+bind("run-batch", async () => {
+  const files = [...$("batch-files").files], language = $("batch-language").value, token = ++batchToken;
+  batchRunning = true; batchResult = null;
+  $("download-batch").disabled = true; $("download-index").disabled = true;
+  $("batch-results").replaceChildren(); $("batch-progress").max = files.length; $("batch-progress").value = 0;
+  $("batch-status").textContent = "正在逐份读取会话并核查记录…"; updateButtons();
+  try {
+    const result = await reviewBatch(state.evaluate, files, language, { cancelled: () => token !== batchToken,
+      onProgress: (rows, total) => { renderBatch(rows); $("batch-progress").value = rows.length; $("batch-status").textContent = `已处理 ${rows.length} / ${total} 份会话。`; } });
+    if (!result || token !== batchToken) return;
+    batchResult = result; renderBatch(result.rows);
+    const success = result.rows.filter(row => row.status === "success").length;
+    $("batch-status").textContent = `处理完成：${success} 份已生成，${result.rows.length - success} 份需要处理。报告语言：${language === "en" ? "English" : "中文"}。`;
+    $("download-batch").disabled = !success; $("download-index").disabled = false;
+  } catch (error) { if (token === batchToken) $("batch-status").textContent = error.message; }
+  finally { if (token === batchToken) { batchRunning = false; updateButtons(); } }
+});
+$("batch-results").addEventListener("click", event => {
+  const button = event.target.closest("button"), id = button?.dataset.openCase || button?.dataset.zipCase;
+  const row = batchResult?.rows.find(row => row.id === id);
+  if (!row) return;
+  if (button.dataset.zipCase) { try { download(row.id + "-report.zip", writeZip(row.bundle), "application/zip"); } catch (error) { message(error.message, true); } return; }
+  if (state.busy) { message("当前操作完成后，即可打开批量记录。", true); return; }
+  $("language").value = batchResult.language;
+  replaceSources(row.session.current, row.session.before); state.saved = null; showView("records");
+  $("input-status").textContent = row.name;
+  message("批量记录已载入工作区，可继续编辑并重新生成报告。");
+});
+bind("download-batch", () => { if (batchResult) download("target-review-batch.zip", batchZip(batchResult), "application/zip"); });
+bind("download-index", () => { if (batchResult) download("index.json", batchResult.index.find(file => file.name === "index.json").content, "application/json"); });
+$("archive-file").addEventListener("change", () => {
+  archiveToken++; archiveRunning = false; $("archive-results").replaceChildren();
+  $("archive-status").textContent = "文件已选择，点击核查报告包。"; updateButtons();
+});
+bind("verify-archive", async () => {
+  const file = $("archive-file").files[0], token = ++archiveToken;
+  if (!file) throw new Error("请选择报告 ZIP。");
+  archiveRunning = true; $("archive-results").replaceChildren(); $("archive-status").textContent = "正在检查归档结构与报告清单…"; updateButtons();
+  try {
+    if (file.size > ZIP_LIMITS.bytes) throw new Error("报告 ZIP 超过 64 MiB，请拆分后重试。");
+    const results = await verifyArchive(state.evaluate, await file.arrayBuffer());
+    if (token !== archiveToken) return;
+    $("archive-results").innerHTML = results.map(result => `<article class="batch-row"><div class="batch-row-heading"><strong>${esc(result.id)}</strong><span class="batch-state ${result.ok ? "passed" : "failed"}">${result.ok ? "完整性检查通过" : "检查未通过"}</span></div>${result.diagnostics.map(d => `<p class="batch-detail">${esc(d.code)} · ${esc(d.message)}</p>`).join("")}</article>`).join("");
+    const passed = results.filter(result => result.ok).length;
+    $("archive-status").textContent = `已核查 ${results.length} 份报告包，${passed} 份通过，${results.length - passed} 份未通过。`;
+  } catch (error) { if (token === archiveToken) $("archive-status").textContent = "核查未完成：" + error.message; }
+  finally { if (token === archiveToken) { archiveRunning = false; updateButtons(); } }
 });
 
 window.addEventListener("pagehide", () => urls.forEach(url => URL.revokeObjectURL(url)));

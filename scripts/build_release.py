@@ -47,7 +47,7 @@ def main():
     browser = output / (stem + "-browser.zip")
     # Explicit runtime allowlist: no acceptance fixtures, drafts or local screenshots.
     with ZipFile(browser, "w", ZIP_DEFLATED) as archive:
-        for name in ("index.html", "smoke.html", "browser.js", "browser.d.ts", "app.mjs", "workbench.mjs", "examples.mjs", "workbench.css", "package.json", "serve_browser.py"):
+        for name in ("index.html", "smoke.html", "browser.js", "browser.d.ts", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "examples.mjs", "workbench.css", "package.json", "serve_browser.py"):
             archive.write(ROOT / "_build/browser" / name, name)
         archive.write(ROOT / "LICENSE", "LICENSE")
         archive.write(ROOT / "docs/workbench.md", "WORKBENCH.md")

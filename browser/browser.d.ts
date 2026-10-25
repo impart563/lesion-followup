@@ -13,7 +13,14 @@ export type BrowserRequest =
       language?: "en" | "zh-CN" }
   | { schema_version: 1; action: "compare"; study_json: string; followup_csv: string;
       compare_study_json: string; compare_followup_csv: string;
-      language?: "en" | "zh-CN"; format?: "json" | "markdown" | "html" };
+      language?: "en" | "zh-CN"; format?: "json" | "markdown" | "html" }
+  | { schema_version: 1; action: "bundle"; study_json: string; followup_csv: string;
+      language?: "en" | "zh-CN" }
+  | { schema_version: 1; action: "verify-bundle"; manifest: string;
+      files: { name: string; content: string }[] }
+  | { schema_version: 1; action: "batch-index"; language?: "en" | "zh-CN";
+      cases: { id: string; status: "success" | "input_error" | "io_error"; message: string;
+        visit_count: number; review_hint_count: number }[] };
 
 export interface ReviewNotice {
   code: string; message: string; source: string; field: string | null;
@@ -33,7 +40,7 @@ export type BrowserResponse = Envelope & (
   | { ok: false; action: null; error_kind: "request";
       diagnostics: { code: string; field: string; message: string }[];
       preflight: null; result: null }
-  | { ok: false; action: "review" | "preflight" | "editor"; error_kind: "input";
+  | { ok: false; action: "review" | "preflight" | "editor" | "bundle"; error_kind: "input";
       diagnostics: []; preflight: Preflight; result: null }
   | { ok: true; action: "review" | "preflight"; error_kind: null;
       diagnostics: []; preflight: Preflight; result: ReportResult }
@@ -41,6 +48,15 @@ export type BrowserResponse = Envelope & (
       diagnostics: []; preflight: null; result: TemplateResult }
   | { ok: true; action: "editor"; error_kind: null;
       diagnostics: []; preflight: Preflight; result: EditorResult }
+  | { ok: true; action: "bundle"; error_kind: null;
+      diagnostics: []; preflight: Preflight; result: TemplateResult }
+  | { ok: true; action: "batch-index"; error_kind: null;
+      diagnostics: []; preflight: null; result: TemplateResult }
+  | { ok: true; action: "verify-bundle"; error_kind: null;
+      diagnostics: []; preflight: null; result: ReportResult }
+  | { ok: false; action: "verify-bundle"; error_kind: "bundle";
+      diagnostics: { code: string; message: string; field: string | null; line: number | null; column: number | null }[];
+      preflight: null; result: null }
   | { ok: true; action: "compare"; error_kind: null; diagnostics: [];
       preflight: { before: Preflight; after: Preflight }; result: ReportResult }
   | { ok: false; action: "compare"; error_kind: "input" | "comparison";

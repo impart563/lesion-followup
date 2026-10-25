@@ -34,6 +34,12 @@ fn report_result(format : String, content : String) -> Json {
 ///|
 fn dispatch(request : Request) -> Json {
   let action = Json::string(request.action)
+  if request.action == "verify-bundle" {
+    return dispatch_bundle_check(request)
+  }
+  if request.action == "batch-index" {
+    return dispatch_batch_index(request)
+  }
   if request.action == "compare" {
     return dispatch_comparison(request)
   }
@@ -97,6 +103,20 @@ fn dispatch(request : Request) -> Json {
   let study = @lib.parse_study_json(request.study_json).unwrap()
   let visits = @lib.parse_followup_csv(request.followup_csv).unwrap()
   let trajectory = @lib.replay_track(study, visits).unwrap()
+  if request.action == "bundle" {
+    let files = @lib.review_artifacts(trajectory, language=request.language)
+    let manifest = @lib.render_bundle_manifest(
+      trajectory,
+      files,
+      language=request.language,
+      raw_inputs=[
+        ("study", @utf8.encode(request.study_json)),
+        ("followup", @utf8.encode(request.followup_csv)),
+      ],
+    )
+    files.push(("manifest.json", manifest))
+    return envelope(action, true, Json::null(), [], quality, file_result(files))
+  }
   let content = match request.format {
     "json" => @lib.render_audit_json(trajectory)
     "csv" => @lib.render_audit_csv(trajectory)

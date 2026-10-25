@@ -180,3 +180,34 @@ document contracts and synthetic fixtures with Node, not this optional renderer.
 
 The screenshot in the README shows the workbench with synthetic data. These
 checks establish software behavior and layout only, not clinical validation.
+
+## Browser batch and ZIP delivery
+
+The unified acceptance script also runs `delivery_acceptance.py` and its Node
+transport checks. Four independent native bundles cover both languages and
+LF/Unicode-CRLF source strings; all 20 report/manifest files are compared byte
+for byte. Python generates stored, DEFLATE and streamed/data-descriptor ZIPs
+with UTF-8 directory names. Browser-generated single/batch ZIPs are opened with
+Python `zipfile`, checked for CRC consistency and verified by the native CLI.
+
+Mixed sessions cover valid revised input, corrupt containers, invalid clinical
+input, file-read failure and valid NE. Cancellation, explicit resource limits,
+unchanged source pairs, native index paths and partial batch results are checked.
+Independent malformed ZIP fixtures cover unsafe paths, case and Unicode name
+collisions, invalid UTF-8, symlinks, ZIP64 extras and underdeclared DEFLATE output.
+Additional checks reject artifact changes, missing files/manifests, unsupported
+profiles, unexpected files, truncated archives and inconsistent headers or CRCs.
+These are software interoperability and integrity checks, not clinical validation.
+
+On 2026-10-25, actual file-chooser selection in the Windows in-app browser
+processed four synthetic sessions into two successful reports and two separately
+identified failures. The downloaded batch ZIP was selected again and both report
+directories passed integrity checks. Opening the revised session preserved its
+reference version and reproduced one input change and three affected visits;
+the current report also exported a separate ZIP. A changed HTML artifact returned
+`bundle_mismatch` while editor sources remained unchanged. An independent Python
+DEFLATE ZIP with data descriptors passed in the actual browser as well.
+
+The workbench layout was visually checked at the existing 781 × 742 viewport.
+No mobile viewport or native print dialog check is claimed for this batch. The
+unified CI suite checks transports and data contracts without GUI automation.

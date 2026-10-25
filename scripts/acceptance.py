@@ -23,6 +23,7 @@ from browser_acceptance import verify_browser
 from distribution import module_version, verify_candidate_consumer
 from reproduce_examples import reproduce
 from revision_acceptance import verify_revisions
+from delivery_acceptance import verify_delivery
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -460,6 +461,7 @@ def main():
         passed("untrusted text escaping and multiline CSV round trip")
     browser = verify_browser(run, cli, outputs, chinese_outputs, passed, environment)
     revisions = verify_revisions(cli, environment, passed)
+    delivery = verify_delivery(cli, environment, passed)
     with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
         collection = Path(directory) / "复核 示例"
         examples = reproduce(collection, cli)
@@ -471,7 +473,7 @@ def main():
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
-    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "workbench.css")), "browser workbench sources missing from module archive")
+    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
@@ -494,6 +496,7 @@ def main():
         "unit_tests": test_counts,
         "browser_adapter": browser,
         "browser_revisions": revisions,
+        "browser_delivery": delivery,
         "example_collection": examples,
         "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,

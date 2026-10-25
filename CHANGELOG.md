@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add independent browser batch review of portable sessions, per-case failures,
+  explicit record opening and native-rendered report indexes.
+- Add deterministic ZIP delivery for current and batch reports, with five-file
+  contents matching native bundles and successful native verification after export.
+- Add bounded stored/DEFLATE ZIP import, path/CRC checks and per-directory core
+  bundle validation without executing imported HTML or replacing editor inputs.
+
 - Add workbench selection of the complete synthetic example collection, including
   a paired revision example with its original comparison version.
 - Add a strict browser comparison action with independent input preflights and

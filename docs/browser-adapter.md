@@ -74,7 +74,7 @@ millimetre. Threshold comparison and missing-observation semantics are unchanged
 Every request is an object with numeric `schema_version: 1` and an `action`.
 Unknown fields, wrong types, unsupported values and fields belonging to another
 action are rejected. Optional fields must be omitted to use defaults; `null`
-does not select a default. `language` defaults to `en` and accepts `en` or `zh-CN`.
+does not select a default. `language` defaults to `en` and accepts `en` or `zh-CN` on actions that support it.
 
 | Action | Required text fields | Optional fields | Result |
 | --- | --- | --- | --- |
@@ -82,6 +82,9 @@ does not select a default. `language` defaults to `en` and accepts `en` or `zh-C
 | `preflight` | `study_json`, `followup_csv` | `language`, `format` = `json` | Input checks without response categories |
 | `template` | None | `language`, `template` = `multi` | Matched synthetic files |
 | `editor` | `study_json`, `followup_csv` | `language` | Parsed study and editable CSV cells, with preflight |
+| `bundle` | `study_json`, `followup_csv` | `language` | Five native report files |
+| `verify-bundle` | `manifest`, plus `files` array | None | Core bundle validation |
+| `batch-index` | `cases` array | `language` | Native index JSON and HTML |
 | `compare` | `study_json`, `followup_csv`, `compare_study_json`, `compare_followup_csv` | `language`, `format` = `json` | Existing revision report text |
 
 `compare` uses `compare_*` as the original version and unprefixed fields as the
@@ -145,8 +148,12 @@ describe the response variants.
 | State | `action` | `ok` | `error_kind` | `preflight` | `result` |
 | --- | --- | --- | --- | --- | --- |
 | Invalid request | `null` | `false` | `request` | `null` | `null` |
-| Invalid study/CSV input (review/preflight/editor) | Requested action | `false` | `input` | Full report | `null` |
+| Invalid study/CSV input (review/preflight/editor/bundle) | Requested action | `false` | `input` | Full report | `null` |
 | Valid review/preflight | Requested action | `true` | `null` | Full report | Format/media type/content |
+| Valid bundle | `bundle` | `true` | `null` | Full report | `files: [{name, content}]` |
+| Valid batch index | `batch-index` | `true` | `null` | `null` | `files: [{name, content}]` |
+| Intact bundle | `verify-bundle` | `true` | `null` | `null` | JSON validation content |
+| Bundle validation failure | `verify-bundle` | `false` | `bundle` | `null` | `null` |
 | Valid template | `template` | `true` | `null` | `null` | `files: [{name, content}]` |
 | Editable input shape | `editor` | `true` | `null` | Full report, possibly `valid: false` | `study`, `rows` |
 | Comparison input failure | `compare` | `false` | `input` | `before` and `after` reports | `null` |
@@ -162,7 +169,7 @@ For request errors, `diagnostics` contains a `code`, JSON `field` path and
 English `message`. Codes are `request_json`, `request_schema`, `request_version`,
 `request_action`, `request_language`, `request_format` and `request_template`.
 The adapter returns one request diagnostic. For recognized requests other than
-incompatible-profile comparisons, `diagnostics` is empty: existing parse diagnostics and structural issues retain
+incompatible-profile comparisons and bundle validation, `diagnostics` is empty: existing parse diagnostics and structural issues retain
 their codes, messages and locations inside `preflight.diagnostics` and
 `preflight.input_issues`. This avoids duplicating or relabeling source errors.
 
@@ -177,8 +184,43 @@ remain language independent. JSON result content is a string containing the
 existing audit schema; parse it a second time when structured evidence is needed.
 Media types omit a charset; all strings are Unicode and saved files use UTF-8.
 Each call evaluates its complete supplied track and retains no previous track.
-The v1 adapter exposes review, preflight, templates and editor cells; revision and batch file
-workflows continue through their existing APIs/CLI.
+The browser adapter remains an in-memory boundary. File selection, ZIP transport,
+progress display and downloads belong to the workbench, outside the MoonBit library.
+
+## Report delivery actions
+
+`bundle` rejects `format`. After the existing preflight and replay it returns
+`report.html`, `audit.json`, `audit.csv`, `chart.svg` and `manifest.json`, using
+`review_artifacts` and `render_bundle_manifest`. The manifest's `raw_bytes` inputs
+are the UTF-8 encoding of the supplied strings. They match native raw-file hashes
+when the supplied text represents the same valid UTF-8 bytes. A browser's initial
+file decoding may strip a BOM or replace invalid bytes; this boundary does not
+recover original disk bytes. CRLF retained in a supplied string is preserved.
+
+`verify-bundle` requires a manifest string and `files: [{name, content}]`, with
+at most four artifact entries, each containing exactly those two string fields.
+It delegates UTF-8 bytes to `verify_bundle`. Missing, duplicated, unexpected or
+changed artifacts retain core diagnostics in top-level `diagnostics`; failure
+uses `error_kind: bundle`, null preflight and null result. Success returns the
+native validation JSON in the usual format/content object. It checks bundle
+consistency, not producer identity or clinical correctness; it does not rerun
+all classifications or verify original source files that are not in the archive.
+
+`batch-index` requires 1–20 `cases`. Each has exactly `id`, `status`, `message`,
+`visit_count` and `review_hint_count`. Counts are integers from 0 to 2147483647;
+status is `success`, `input_error` or `io_error`. IDs reuse the native portable,
+case-insensitively unique identifier rules. Successful report paths are generated
+as `id/report.html`; failures have no report path. The result contains
+`index.json` and `index.html` from the existing core renderers. These are supplied
+metadata, not independently evaluated clinical results. The workbench constructs
+them from each session's actual bundle/preflight response.
+
+The JavaScript archive layer supports bounded stored and DEFLATE ZIPs without
+extracting files to disk. Its limits and supported layout are described in the
+[workbench guide](workbench.md). ZIP structure follows the
+[PKWARE APPNOTE 6.3.10](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT);
+DEFLATE decoding uses the standard
+[Compression Streams API](https://compression.spec.whatwg.org/).
 
 ## Verification
 
@@ -193,7 +235,7 @@ five-format reports and preflights against the native CLI. Synthetic cases cover
 PR/PD adjacent tenths, both PD conditions, node CR at 9.9/10.0 mm, revised nadirs,
 post-PD NE, missing values, a technique change, exact precision rejection,
 numeric JSON diameter rejection, physical multiline locations and Unicode notes.
-The six MoonBit adapter tests run on all four library targets as well.
+The MoonBit adapter tests run on all four library targets as well.
 
 On 2026-10-25 the packaged smoke page passed all five checks in the Codex in-app
 browser, reporting Chromium 155.0.0.0 on Windows. It loaded the local compiled
