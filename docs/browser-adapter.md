@@ -21,19 +21,20 @@ and `smoke.html`, a synthetic smoke page. A source
 map is copied if emitted by the compiler. The JavaScript module has no runtime
 dependencies or external asset imports. Serve these local files over HTTP with
 a static server; browsers generally restrict ES module loading from `file:` URLs.
-No server-side computation is needed. For example, on Linux/macOS:
+No server-side computation is needed. Use the supplied loopback server on all
+platforms; it sets explicit JavaScript MIME types for `.js` and `.mjs`:
 
 ```sh
-python -m http.server 8765 --bind 127.0.0.1 --directory _build/browser
+python scripts/serve_browser.py --directory _build/browser --port 8765
 ```
 
-On Windows, if Python's HTTPServer hostname lookup fails, run from the repository:
+To keep the repository-root URL instead, run:
 
 ```sh
-python -u -c "import http.server,socketserver; server=socketserver.TCPServer(('127.0.0.1',8765),http.server.SimpleHTTPRequestHandler); server.serve_forever()"
+python scripts/serve_browser.py --directory . --port 8765
 ```
 
-Open `http://127.0.0.1:8765/_build/browser/` for the Windows command, or
+Open `http://127.0.0.1:8765/_build/browser/` for the repository-root command, or
 `http://127.0.0.1:8765/` when serving the output directory. Append `smoke.html`
 for the five synthetic adapter checks. The [workbench guide](workbench.md)
 describes import, editing, explicit drafts and current-report printing.

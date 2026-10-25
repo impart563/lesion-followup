@@ -13,17 +13,20 @@ python scripts/build_browser.py
 ```
 
 构建结果位于 `_build/browser/`。需要用本地 HTTP 服务打开，浏览器通常不允许从
-`file:` 地址载入 ES 模块。Windows 可在仓库根目录运行：
+`file:` 地址载入 ES 模块。各平台均可在仓库根目录运行：
 
 ```sh
-python -u -c "import http.server,socketserver; server=socketserver.TCPServer(('127.0.0.1',8765),http.server.SimpleHTTPRequestHandler); server.serve_forever()"
+python scripts/serve_browser.py --directory . --port 8765
 ```
 
-随后打开 `http://127.0.0.1:8765/_build/browser/`。Linux/macOS 也可直接服务构建目录：
+随后打开 `http://127.0.0.1:8765/_build/browser/`。也可只服务构建目录：
 
 ```sh
-python -m http.server 8765 --bind 127.0.0.1 --directory _build/browser
+python scripts/serve_browser.py --directory _build/browser --port 8765
 ```
+
+后一命令对应 `http://127.0.0.1:8765/`。启动脚本只监听本机，固定 `.js` / `.mjs` 的
+JavaScript 文件类型，避免 Windows 系统映射影响模块加载。发布候选浏览器包内也附带同一脚本。
 
 所有运行资源都来自本地构建目录，没有在线字体、CDN 或远程计算服务。页面的
 `connect-src 'none'` 限制主动网络连接。草稿与本地服务的来源地址关联，更换端口、

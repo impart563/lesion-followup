@@ -6,6 +6,8 @@
   importable workbench drafts, revision evidence and matching batch results.
 - Added Windows 2022 and Ubuntu 24.04 clean-checkout CI, including Unicode paths,
   browser HTTP entry checks and preserved per-platform acceptance records.
+- Added a bundled loopback server with explicit ES-module MIME types, handling
+  Windows system mappings and hostname differences during local startup.
 - Added extracted-package consumer checks on all four supported backends and a
   clean-commit release-candidate builder with source, browser and module archives,
   SHA-256 checksums and a publication-state manifest.

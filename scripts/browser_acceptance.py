@@ -6,13 +6,11 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-import functools
-import http.server
-import socketserver
 import threading
 import urllib.request
 
 from build_browser import package_browser
+from serve_browser import make_server
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,14 +21,9 @@ def require(condition, message):
 
 
 def verify_http_entry(output):
-    class QuietHandler(http.server.SimpleHTTPRequestHandler):
-        def log_message(self, *args):
-            pass
-
-    handler = functools.partial(QuietHandler, directory=str(output))
     # These checks are strictly loopback; avoid OS proxy/DNS settings for localhost.
     local_http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    with socketserver.TCPServer(("127.0.0.1", 0), handler) as server:
+    with make_server(output, port=0, quiet=True) as server:
         worker = threading.Thread(target=server.serve_forever, daemon=True)
         worker.start()
         try:

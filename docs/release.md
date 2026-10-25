@@ -23,7 +23,7 @@ moon update
 python scripts/acceptance.py
 python scripts/reproduce_examples.py --output _build/review-examples
 python scripts/build_browser.py
-python -m http.server 8765 --bind 127.0.0.1
+python scripts/serve_browser.py --directory . --port 8765
 ```
 
 打开 `http://127.0.0.1:8765/_build/browser/`，选择导入示例原始文件或生成的 `draft.json`。静态服务器仅提供本地资源，计算在浏览器内完成。CLI 命令、输入及退出码见 [README](../README.md)；浏览器请求见[适配契约](browser-adapter.md)；具体操作见[工作区说明](workbench.md)。
@@ -47,7 +47,7 @@ python scripts/build_release.py --output _build/release
 - `lesion-followup-0.2.0-rc.1-browser.zip`：可由普通静态服务器提供的完整工作区，无需重新编译。
 - `release-manifest.json` 与 `SHA256SUMS`：提交、验收指纹、归档字节数与摘要，以及实际发布状态。
 
-浏览器包解压后，在该目录启动本地静态服务器并打开根路径。需支持 ES modules、Web Crypto 和本地文件选择的现代浏览器；不能直接双击 `index.html` 代替 HTTP 入口。浏览器内导出和本地草稿的限制见工作区说明。
+浏览器包解压后，在该目录运行 `python serve_browser.py --port 8765` 并打开 `http://127.0.0.1:8765/`。随包启动脚本固定 ES module 的 MIME 类型，兼容 Windows 的系统文件类型差异，并仅监听本机。需支持 ES modules、Web Crypto 和本地文件选择的现代浏览器；不能直接双击 `index.html` 代替 HTTP 入口。浏览器内导出和本地草稿的限制见工作区说明。
 
 ## 发布状态与正式发布步骤
 

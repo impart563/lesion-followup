@@ -474,6 +474,7 @@ def main():
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
     candidate_consumer = verify_candidate_consumer(package_path, moon, environment)
+    commands.extend(candidate_consumer["commands"])
     passed("independent extracted-candidate consumer on four backends")
     fingerprint, source_files = source_digest()
     record = {

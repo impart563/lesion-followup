@@ -20,6 +20,7 @@ def package_browser():
     shutil.copyfile(str(ROOT / "browser" / "browser.d.ts"), str(output / "browser.d.ts"))
     for name in ("index.html", "smoke.html", "app.mjs", "workbench.mjs", "workbench.css"):
         shutil.copyfile(str(ROOT / "browser" / name), str(output / name))
+    shutil.copyfile(str(ROOT / "scripts/serve_browser.py"), str(output / "serve_browser.py"))
     (output / "package.json").write_text(json.dumps({"type": "module"}) + "\n", encoding="utf-8")
     print("Browser files: " + str(output))
     return output

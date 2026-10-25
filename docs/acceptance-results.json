@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-25T02:26:11.646223+00:00",
+  "checked_at_utc": "2026-10-25T02:31:08.697274+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,8 +12,8 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "842dc9dce96331d3ad06f6358516107901e611a5dcf49462c9bf913e9624471b",
-  "source_file_count": 108,
+  "source_sha256": "3bc2ca03cf9bce1392b1dfc39c9420a140ac7f16a5a75fe834d047992ff96628",
+  "source_file_count": 109,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -129,6 +129,28 @@
       "js": "passed",
       "native": "passed"
     },
+    "commands": [
+      {
+        "command": "moon run --target wasm .",
+        "cwd": "<extracted-candidate-consumer>",
+        "exit_code": 0
+      },
+      {
+        "command": "moon run --target wasm-gc .",
+        "cwd": "<extracted-candidate-consumer>",
+        "exit_code": 0
+      },
+      {
+        "command": "moon run --target js .",
+        "cwd": "<extracted-candidate-consumer>",
+        "exit_code": 0
+      },
+      {
+        "command": "moon run --target native .",
+        "cwd": "<extracted-candidate-consumer>",
+        "exit_code": 0
+      }
+    ],
     "registry_install": "not performed; candidate is unpublished"
   },
   "workflow_checks": [
@@ -211,7 +233,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 184,
+  "command_count": 188,
   "commands": [
     {
       "command": "moon version --all",
@@ -1131,6 +1153,26 @@
     {
       "command": "moon package",
       "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target wasm .",
+      "cwd": "<extracted-candidate-consumer>",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target wasm-gc .",
+      "cwd": "<extracted-candidate-consumer>",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target js .",
+      "cwd": "<extracted-candidate-consumer>",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native .",
+      "cwd": "<extracted-candidate-consumer>",
       "exit_code": 0
     }
   ]

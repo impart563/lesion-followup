@@ -48,7 +48,11 @@ same script without restored build/dependency caches. The Windows image provides
 Visual Studio native build tools. Each job uploads its actual platform record,
 compiled browser entry and candidate module archive. The record includes runner
 OS, commit and run ID; source fingerprints normalize CRLF to LF. HTTP entry checks
-verify MIME types and exact runtime bytes; they do not claim GUI-browser tests.
+verify MIME types and exact runtime bytes through the included loopback server;
+they do not claim GUI-browser tests. Windows system mappings may classify `.mjs`
+as an ordinary file, so `scripts/serve_browser.py` explicitly supplies JavaScript
+MIME types and avoids hostname-dependent startup. The compiled browser archive
+includes the same standalone server.
 
 When upgrading MoonBit, review formatter and public-interface changes and rerun
 the complete acceptance script before updating the CI pin and saved result.
