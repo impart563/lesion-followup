@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-25T02:31:08.697274+00:00",
+  "checked_at_utc": "2026-10-25T04:47:21.897814+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,30 +12,30 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "3bc2ca03cf9bce1392b1dfc39c9420a140ac7f16a5a75fe834d047992ff96628",
-  "source_file_count": 109,
+  "source_sha256": "3eeead251d272e4ded64b2be02a462c3f1e8b022a8d8cbcd92f1cdb7bb990d44",
+  "source_file_count": 113,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
   "unit_tests": {
     "wasm": {
-      "total": 52,
-      "passed": 52,
+      "total": 55,
+      "passed": 55,
       "failed": 0
     },
     "wasm-gc": {
-      "total": 52,
-      "passed": 52,
+      "total": 55,
+      "passed": 55,
       "failed": 0
     },
     "js": {
-      "total": 52,
-      "passed": 52,
+      "total": 55,
+      "passed": 55,
       "failed": 0
     },
     "native": {
-      "total": 56,
-      "passed": 56,
+      "total": 59,
+      "passed": 59,
       "failed": 0
     }
   },
@@ -59,6 +59,18 @@
       "print_fixture_visits": 36,
       "print_fixture_observations": 72
     }
+  },
+  "browser_revisions": {
+    "checks": [
+      "three-format bilingual comparison outputs match independent native replays",
+      "revision preserves changed nadir, downstream PD/NE and exact original fingerprints",
+      "separate preflights, incompatible baselines and strict requests never produce partial comparisons",
+      "portable sessions retain both original pairs, unfinished Unicode text and a stable payload snapshot",
+      "tampered or incompatible sessions are rejected; valid restoration recomputes the same evidence",
+      "bundled examples match the original synthetic files and independent hand calculations"
+    ],
+    "native_format_comparisons": 24,
+    "bundled_examples": 4
   },
   "example_collection": {
     "status": "passed",
@@ -175,6 +187,8 @@
     "browser/native parity: bilingual five-format reports, exact boundaries, NE gates and located errors",
     "workbench table edits, exact CSV round trips and strict unfinished draft contracts",
     "summary/full print evidence, independent input hashes, long-track fixtures and offline assets",
+    "browser revisions: bilingual native parity, exact source pairs, independent diagnostics and baseline guards",
+    "portable review sessions: independent hashes, unfinished inputs, tamper rejection and restored evidence",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends"
@@ -233,7 +247,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 188,
+  "command_count": 212,
   "commands": [
     {
       "command": "moon version --all",
@@ -994,6 +1008,126 @@
       "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
       "cwd": ".",
       "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.revised.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/followup.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/missing.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang en --format html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study examples/study.json --input examples/review-cases/technique.csv --compare-study examples/study.json --compare-input examples/followup.csv --lang zh-CN --format html",
+      "cwd": ".",
+      "exit_code": 0
     },
     {
       "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --check-input --format json",
