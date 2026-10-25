@@ -1,10 +1,19 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-24T20:13:12.756071+00:00",
-  "module": "impart563/lesion-followup@0.1.0",
+  "checked_at_utc": "2026-10-25T02:26:11.646223+00:00",
+  "module": "impart563/lesion-followup@0.2.0",
+  "platform": {
+    "system": "Windows",
+    "machine": "AMD64"
+  },
+  "github_actions": {
+    "GITHUB_SHA": null,
+    "GITHUB_RUN_ID": null,
+    "RUNNER_OS": null
+  },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "1781b41f5e2803615d32e44aa7e4ae2161b1b52c022e2988cdc1ba7f193e200d",
-  "source_file_count": 98,
+  "source_sha256": "842dc9dce96331d3ad06f6358516107901e611a5dcf49462c9bf913e9624471b",
+  "source_file_count": 108,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -51,6 +60,77 @@
       "print_fixture_observations": 72
     }
   },
+  "example_collection": {
+    "status": "passed",
+    "scope": "synthetic target-lesion software examples; not clinical validation",
+    "cases": [
+      {
+        "id": "multi",
+        "target_responses": [
+          "PR",
+          "PR",
+          "PR",
+          "PD"
+        ],
+        "input_sha256": {
+          "study.json": "487f88182f3668cd3dfa9b7fb5b0f2e9dcbbc1347a63dbe44b5923530ff9302c",
+          "followup.csv": "94e4642d40133b93f88584ba83f1264faf750df0375f7ca70fd8114275a3788d"
+        }
+      },
+      {
+        "id": "missing",
+        "target_responses": [
+          "PR",
+          "NE",
+          "PR",
+          "PD"
+        ],
+        "input_sha256": {
+          "study.json": "487f88182f3668cd3dfa9b7fb5b0f2e9dcbbc1347a63dbe44b5923530ff9302c",
+          "followup.csv": "da7a2f4d3f20dd71d40d2654c1f038517970d6a5a1a7392726b1a9813e8efa76"
+        }
+      },
+      {
+        "id": "technique",
+        "target_responses": [
+          "PR",
+          "NE",
+          "PR",
+          "PD"
+        ],
+        "input_sha256": {
+          "study.json": "487f88182f3668cd3dfa9b7fb5b0f2e9dcbbc1347a63dbe44b5923530ff9302c",
+          "followup.csv": "d7d10f537e4cabab80e981ef0e445740d752d02064b2214b688b276c62c0fa8a"
+        }
+      },
+      {
+        "id": "revised",
+        "target_responses": [
+          "PR",
+          "PR",
+          "PD",
+          "NE"
+        ],
+        "input_sha256": {
+          "study.json": "487f88182f3668cd3dfa9b7fb5b0f2e9dcbbc1347a63dbe44b5923530ff9302c",
+          "followup.csv": "363c2dd2b9a9e4f06f376f5ac198b374088385eea8f2b8dbfd84e2838c506f77"
+        }
+      }
+    ],
+    "batch_success_count": 4,
+    "changed_observations": 1,
+    "affected_visits": 3
+  },
+  "candidate_consumer": {
+    "source": "extracted Mooncakes candidate; no checkout library link",
+    "backends": {
+      "wasm": "passed",
+      "wasm-gc": "passed",
+      "js": "passed",
+      "native": "passed"
+    },
+    "registry_install": "not performed; candidate is unpublished"
+  },
   "workflow_checks": [
     "format, warning-free checks, native build, four-target tests and public interfaces",
     "public quickstart and separate downstream module",
@@ -68,11 +148,14 @@
     "quality preflight distinguishes errors and review hints with physical source locations",
     "structured input errors, no partial report, source protection and I/O failures",
     "untrusted text escaping and multiline CSV round trip",
+    "localhost browser entry, ES-module MIME types and exact runtime assets",
     "browser ES module exports, versioned contracts, templates and independent calls",
     "browser/native parity: bilingual five-format reports, exact boundaries, NE gates and located errors",
     "workbench table edits, exact CSV round trips and strict unfinished draft contracts",
     "summary/full print evidence, independent input hashes, long-track fixtures and offline assets",
-    "package archive and synchronized tested README"
+    "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
+    "package archive and synchronized tested README",
+    "independent extracted-candidate consumer on four backends"
   ],
   "scenario_summaries": {
     "nadir-boundary": {
@@ -128,7 +211,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 153,
+  "command_count": 184,
   "commands": [
     {
       "command": "moon version --all",
@@ -889,6 +972,161 @@
       "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
       "cwd": ".",
       "exit_code": 2
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format json --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format csv --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format markdown --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format svg --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --format json --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --format csv --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --format markdown --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --format svg --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\missing.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --format json --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --format csv --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --format markdown --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --format svg --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\technique.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --format json --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --format csv --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --format markdown --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --format svg --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --batch C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\batch.json --bundle <temporary>/batch --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/multi --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/missing --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/technique --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/revised --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --compare-study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --compare-input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.revised.csv --compare-study C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\study.json --compare-input C:\\Users\\px830\\Documents\\ChatGPT\\我哥的moonbit项目\\examples\\review-cases\\..\\followup.csv --format html --lang zh-CN",
+      "cwd": ".",
+      "exit_code": 0
     },
     {
       "command": "moon package",
