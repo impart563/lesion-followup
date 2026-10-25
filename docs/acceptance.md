@@ -80,6 +80,7 @@ registry can resolve `moonbitlang/async`; CI performs this step explicitly.
 | Print preparation | Summary/full documents retain matching inputs and complete evidence links; synthetic 36-visit fixtures exercise long tables, Unicode notes and NE |
 | Complete examples | Four hand-calculated tracks, twenty browser/native format comparisons, importable drafts, revision and matching batch outputs |
 | Candidate consumption | A separate temporary consumer reads the extracted module archive, and runs on wasm, wasm-gc, js and native without linking the checkout library |
+| Browser revisions and sessions | Twenty-four bilingual native format comparisons, independent preflight locations, baseline guards, fixed source fingerprints, strict session versions, independent SHA-256 checks, tamper rejection and restored evidence |
 
 `docs/acceptance-results.json` is written only after every check passes. It
 records the toolchain, actual per-target test counts, scenario outcomes, command
@@ -106,6 +107,17 @@ input fixtures are synthetic. This is software acceptance, not clinical,
 regulatory, imaging-reader or diagnostic validation.
 
 ## Complete collection and candidate checks
+
+The subsequent workbench review on 2026-10-25 covered all four catalogue options
+and the single-target template through the actual selector. A paired revision
+showed one changed observation and three affected visits. Downloaded comparison
+JSON matched native CLI bytes. A downloaded review session passed an independent
+SHA-256 check; importing and exporting again preserved both original CSV strings,
+including CRLF. Editing withdrew the previous comparison; identical inputs gave
+an empty diff. Corrupt sessions retained the existing result, incompatible
+baselines returned no partial comparison, and unfinished text remained editable
+while report generation stayed blocked. These are software workflow checks with
+synthetic inputs, not clinical validation.
 
 On 2026-10-25, the `missing/draft.json` produced by the unified collection script
 was imported through the actual local workbench file chooser. The report showed

@@ -21,6 +21,14 @@ def package_browser():
     for name in ("index.html", "smoke.html", "app.mjs", "workbench.mjs", "workbench.css"):
         shutil.copyfile(str(ROOT / "browser" / name), str(output / name))
     shutil.copyfile(str(ROOT / "scripts/serve_browser.py"), str(output / "serve_browser.py"))
+    cases = ROOT / "examples/review-cases"
+    catalogue = json.loads((cases / "expected.json").read_text(encoding="utf-8"))
+    examples = {}
+    for case in catalogue["cases"]:
+        examples[case["id"]] = {"study_json": (cases / case["study"]).read_bytes().decode("utf-8"),
+                                 "followup_csv": (cases / case["input"]).read_bytes().decode("utf-8")}
+    (output / "examples.mjs").write_text("// Synthetic inputs bundled at build time.\nexport const examples = " +
+                                       json.dumps(examples, ensure_ascii=False, indent=2) + ";\n", encoding="utf-8")
     (output / "package.json").write_text(json.dumps({"type": "module"}) + "\n", encoding="utf-8")
     print("Browser files: " + str(output))
     return output

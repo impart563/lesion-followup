@@ -47,6 +47,11 @@ documented in the [release guide](docs/release.md). Windows and Linux CI run the
 same acceptance suite from clean checkouts, including independent consumption of
 the extracted candidate package. Registry publication is recorded separately.
 
+The current workbench also provides direct selection of the complete synthetic
+examples, fixed-reference revision comparison and portable two-version review
+sessions. See the [workbench guide](docs/workbench.md) for saving both original
+source pairs and restoring them for a fresh comparison.
+
 ### Prepare and check inputs
 
 `--init-example NEW_DIRECTORY` creates `study.json`, `followup.csv` and filling

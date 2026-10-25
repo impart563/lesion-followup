@@ -11,6 +11,8 @@ priv struct Request {
   study_json : String
   followup_csv : String
   template : String
+  compare_study_json : String
+  compare_followup_csv : String
 }
 
 ///|
@@ -49,15 +51,22 @@ fn decode_request(text : String) -> Request raise RequestError {
     )
   }
   let action = string_field(fields, "action")
-  guard ["review", "preflight", "template", "editor"].contains(action) else {
+  guard ["review", "preflight", "template", "editor", "compare"].contains(
+    action,
+  ) else {
     raise RequestError(
-      "request_action", "$.action", "Use review, preflight, template or editor.",
+      "request_action", "$.action", "Use review, preflight, template, editor or compare.",
     )
   }
   let keys = if action == "template" {
     ["schema_version", "action", "language", "template"]
   } else if action == "editor" {
     ["schema_version", "action", "language", "study_json", "followup_csv"]
+  } else if action == "compare" {
+    [
+      "schema_version", "action", "language", "format", "study_json", "followup_csv",
+      "compare_study_json", "compare_followup_csv",
+    ]
   } else {
     [
       "schema_version", "action", "language", "format", "study_json", "followup_csv",
@@ -94,7 +103,9 @@ fn decode_request(text : String) -> Request raise RequestError {
     ""
   } else {
     let format = string_field(fields, "format", default="json")
-    let supported = if action == "preflight" {
+    let supported = if action == "compare" {
+      ["json", "markdown", "html"]
+    } else if action == "preflight" {
       ["json", "markdown"]
     } else {
       ["json", "csv", "markdown", "svg", "html"]
@@ -111,6 +122,16 @@ fn decode_request(text : String) -> Request raise RequestError {
     language,
     format,
     template,
+    compare_study_json: if action == "compare" {
+      string_field(fields, "compare_study_json")
+    } else {
+      ""
+    },
+    compare_followup_csv: if action == "compare" {
+      string_field(fields, "compare_followup_csv")
+    } else {
+      ""
+    },
     study_json: if action == "template" {
       ""
     } else {

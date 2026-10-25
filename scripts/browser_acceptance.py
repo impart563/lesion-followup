@@ -29,7 +29,8 @@ def verify_http_entry(output):
         try:
             for name, expected_type in (("index.html", "text/html"), ("smoke.html", "text/html"),
                                         ("browser.js", "javascript"), ("app.mjs", "javascript"),
-                                        ("workbench.mjs", "javascript"), ("workbench.css", "text/css")):
+                                        ("workbench.mjs", "javascript"), ("examples.mjs", "javascript"),
+                                        ("workbench.css", "text/css")):
                 url = "http://127.0.0.1:{}/{}".format(server.server_address[1], name)
                 with local_http.open(url, timeout=10) as response:
                     require(expected_type in response.headers["Content-Type"], "wrong runtime MIME type: " + name)

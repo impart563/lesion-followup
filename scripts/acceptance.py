@@ -22,6 +22,7 @@ from zipfile import ZipFile
 from browser_acceptance import verify_browser
 from distribution import module_version, verify_candidate_consumer
 from reproduce_examples import reproduce
+from revision_acceptance import verify_revisions
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -458,6 +459,7 @@ def main():
         require(any(row["message"] == malicious for row in data_rows), "CSV lost a quoted multiline note")
         passed("untrusted text escaping and multiline CSV round trip")
     browser = verify_browser(run, cli, outputs, chinese_outputs, passed, environment)
+    revisions = verify_revisions(cli, environment, passed)
     with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
         collection = Path(directory) / "复核 示例"
         examples = reproduce(collection, cli)
@@ -491,6 +493,7 @@ def main():
         "python_version": __import__("sys").version.split()[0],
         "unit_tests": test_counts,
         "browser_adapter": browser,
+        "browser_revisions": revisions,
         "example_collection": examples,
         "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,

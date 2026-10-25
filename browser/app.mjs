@@ -1,7 +1,8 @@
-import { COLUMNS, DRAFT_KEY, invoke, serializeTable, rowLocations, makeDraft, readDraft, createReview, printDocument, printFragment, escapeHtml as esc } from "./workbench.mjs";
+import { COLUMNS, DRAFT_KEY, invoke, serializeTable, rowLocations, makeDraft, readDraft, createReview, createComparison, makeSession, readSession, printDocument, printFragment, escapeHtml as esc } from "./workbench.mjs";
+import { examples } from "./examples.mjs";
 
 const $ = id => document.getElementById(id);
-const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false };
+const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
 const inputNames = ["随访编号", "日期", "采集标识", "病灶编号", "观察状态", "直径 mm", "读片者说明"];
 const stateNames = { measured: "已测量", absent: "已消失", too_small: "过小，无法可靠测量", missing: "未测量", not_evaluable: "无法评价" };
 const urls = [];
@@ -11,7 +12,12 @@ printShadow.addEventListener("click", event => {
   const target = link && printShadow.getElementById(link.getAttribute("href").slice(1));
   if (target) { event.preventDefault(); target.scrollIntoView({ block: "start" }); }
 });
-const source = () => ({ study_json: $("study-source").value, followup_csv: $("csv-source").value });
+const source = () => ({ ...state.sources });
+function writeSources(sources) {
+  // Textarea display normalizes CRLF; retain loaded text until that side is edited.
+  state.sources = { study_json: sources.study_json, followup_csv: sources.followup_csv };
+  $("study-source").value = sources.study_json; $("csv-source").value = sources.followup_csv;
+}
 const signature = () => JSON.stringify([source(), $("language").value]);
 const message = (text, error = false) => { $("app-status").textContent = text; $("app-status").classList.toggle("error", error); };
 
@@ -20,7 +26,7 @@ function bind(id, handler) {
 }
 
 function showView(name) {
-  const names = { records: "测量记录", quality: "记录核查", report: "复核报告", draft: "草稿" };
+  const names = { records: "测量记录", quality: "记录核查", report: "复核报告", compare: "修订对比", draft: "草稿" };
   document.querySelectorAll("[data-panel]").forEach(el => { el.hidden = el.dataset.panel !== name; });
   document.querySelectorAll(".workspace-nav [data-view]").forEach(el => {
     el.classList.toggle("active", el.dataset.view === name);
@@ -51,7 +57,7 @@ function updateContext() {
 
 document.querySelectorAll("[data-view]").forEach(el => el.addEventListener("click", () => showView(el.dataset.view)));
 document.querySelectorAll("[data-open-import]").forEach(el => el.addEventListener("click", () => $("import-dialog").showModal()));
-document.querySelectorAll("[data-use-example]").forEach(el => el.addEventListener("click", () => $("load-example").click()));
+document.querySelectorAll("[data-use-example]").forEach(el => el.addEventListener("click", () => { $("import-dialog").showModal(); $("template").focus(); }));
 bind("close-import", () => $("import-dialog").close());
 
 function noticeText(notice) {
@@ -94,10 +100,18 @@ function updateButtons() {
   for (const id of ["load-example", "import-inputs", "apply-source", "check-input", "save-draft", "export-draft", "import-draft", "export-study", "export-csv"]) $(id).disabled = !ready || state.busy;
   $("generate-report").disabled = !ready || state.busy || !state.quality?.valid;
   for (const id of ["export-report", "print-summary", "print-full", "export-print"]) $(id).disabled = !state.report;
+  $("capture-baseline").disabled = !ready || state.busy || !state.quality?.valid;
+  $("clear-baseline").disabled = !state.baseline || state.busy;
+  $("compare-current").disabled = !ready || state.busy || !state.baseline;
+  $("export-comparison").disabled = !state.comparison || state.busy;
+  $("export-session").disabled = !ready || state.busy || !(source().study_json || source().followup_csv);
+  $("import-session").disabled = !ready || state.busy;
+  updateBaseline();
   updateContext();
 }
 
 function discardReport() {
+  discardComparison();
   state.report = null;
   $("inline-print").hidden = true;
   printShadow.replaceChildren();
@@ -161,7 +175,7 @@ function validate() {
 function changed(fromTable = false) {
   state.revision++;
   discardReport();
-  if (fromTable) { const texts = serializeTable(state.model); $("study-source").value = texts.study_json; $("csv-source").value = texts.followup_csv; }
+  if (fromTable) writeSources(serializeTable(state.model));
   draftStatus();
   validate();
 }
@@ -239,8 +253,9 @@ function applySources() {
   if (!response.ok) $("source-details").open = true;
 }
 
-function replaceSources(sources) {
-  $("study-source").value = sources.study_json; $("csv-source").value = sources.followup_csv;
+function replaceSources(sources, before = null) {
+  state.baseline = before ? Object.freeze({ study_json: before.study_json, followup_csv: before.followup_csv }) : null;
+  writeSources(sources);
   applySources();
 }
 
@@ -268,11 +283,17 @@ function restore(text, savedOnDevice) {
 }
 
 bind("load-example", () => {
-  const result = invoke(state.evaluate, { action: "template", template: $("template").value, language: "zh-CN" });
-  const files = Object.fromEntries(result.result.files.map(file => [file.name, file.content]));
-  replaceSources({ study_json: files["study.json"], followup_csv: files["followup.csv"] });
+  const name = $("template").value;
+  if (name === "single") {
+    const result = invoke(state.evaluate, { action: "template", template: "single", language: "zh-CN" });
+    const files = Object.fromEntries(result.result.files.map(file => [file.name, file.content]));
+    replaceSources({ study_json: files["study.json"], followup_csv: files["followup.csv"] });
+  } else {
+    replaceSources(examples[name], name === "revised" ? examples.multi : null);
+  }
   $("import-dialog").close(); showView("records");
   $("input-status").textContent = "当前使用合成示例，可自由编辑并体验完整流程。";
+  if (name === "revised") { showView("compare"); message("修订示例已载入，对照版本为原始多靶记录。点击比较查看后续影响。"); }
 });
 bind("import-inputs", async () => {
   const study = $("study-file").files[0], csv = $("csv-file").files[0];
@@ -284,7 +305,10 @@ bind("import-inputs", async () => {
 });
 bind("apply-source", applySources);
 bind("check-input", () => { validate(); message(state.quality.valid ? "记录检查完成，人工核查项已列在下方。" : "有记录需要调整，请查看下方提示。", !state.quality.valid); });
-for (const id of ["study-source", "csv-source"]) $(id).addEventListener("input", () => { state.model = null; renderTables(); changed(); });
+for (const id of ["study-source", "csv-source"]) $(id).addEventListener("input", () => {
+  state.sources[id === "study-source" ? "study_json" : "followup_csv"] = $(id).value;
+  state.model = null; renderTables(); changed();
+});
 $("language").addEventListener("change", () => changed());
 bind("save-draft", () => { const text = makeDraft(source(), $("language").value); localStorage.setItem(DRAFT_KEY, text); state.saved = signature(); localDraftStatus(); draftStatus(); message("草稿已保存，下次打开可从“草稿”中恢复。"); });
 bind("restore-draft", () => { const text = localStorage.getItem(DRAFT_KEY); if (!text) throw new Error("本机没有草稿。"); restore(text, true); });
@@ -334,6 +358,117 @@ bind("export-print", () => {
   const mode = $("print-mode").value;
   download("target-review-print-" + mode + ".html", printDocument(state.report, mode), "text/html");
 });
+
+function updateBaseline() {
+  let profile;
+  try { profile = state.baseline && JSON.parse(state.baseline.study_json); } catch { /* Raw unfinished text remains available in a session. */ }
+  $("baseline-title").textContent = state.baseline ? profile?.study_id || "对照版本待核查" : "尚未设置对照版本";
+  $("baseline-status").textContent = state.baseline ? `基线 ${profile?.baseline_date || "待核对"} · 对照输入已固定，编辑当前记录不会改写它。` : "载入记录后，可将当前输入设为对照，再继续编辑。";
+}
+
+function discardComparison() {
+  state.comparison = null;
+  $("comparison-output").hidden = true;
+  $("comparison-summary").replaceChildren();
+  $("comparison-details").replaceChildren();
+  $("comparison-status").textContent = state.baseline ? "对照版本已保留，点击比较可查看当前记录的修订影响。" : "设置对照版本后，这里会显示修订影响。";
+}
+
+function observationLabel(value, field) {
+  if (value === null) return "—";
+  if (field !== "observation") return field === "visit" ? "整次随访记录" : value;
+  try {
+    const observation = JSON.parse(value);
+    return [stateNames[observation.state] || observation.state,
+      observation.diameter_mm != null ? `${observation.diameter_mm} mm` : null, observation.note].filter(Boolean).join(" · ");
+  } catch { return value; }
+}
+
+function impactLabel(value) {
+  if (!value) return "—";
+  return `${value.target_response} · 总和 ${value.sum_mm ?? "—"} mm · 此前最低值 ${value.prior_nadir_mm} mm（${value.prior_nadir_visit_id}）`;
+}
+
+function comparisonErrors(response) {
+  const messages = [];
+  for (const [side, label] of [["before", "对照版本"], ["after", "当前记录"]]) {
+    const quality = response.preflight?.[side];
+    for (const issue of [...(quality?.diagnostics || []), ...(quality?.input_issues || [])]) {
+      messages.push(`${label} · ${issue.line ? `第 ${issue.line} 行 · ` : ""}${issue.field || "输入"}：${noticeText(issue)}`);
+    }
+  }
+  return messages;
+}
+
+bind("capture-baseline", () => {
+  validate();
+  if (!state.quality?.valid) throw new Error("请先修正当前记录，再将它设为对照版本。");
+  state.baseline = Object.freeze({ ...source() });
+  state.revision++;
+  discardComparison(); updateButtons();
+  message("当前输入已设为对照版本，可以继续编辑测量记录。导出复核会话可一并保留两版输入。");
+});
+bind("clear-baseline", () => {
+  state.baseline = null; state.revision++;
+  discardComparison(); updateButtons(); message("对照版本已清除，可以重新设置。");
+});
+bind("compare-current", async () => {
+  if (!state.baseline) throw new Error("请先设置对照版本。");
+  const revision = state.revision;
+  const before = state.baseline, current = source(), language = $("language").value;
+  state.busy = true; discardComparison(); updateButtons();
+  try {
+    const result = await createComparison(state.evaluate, before, current, language);
+    if (revision !== state.revision) { message("记录已改变，请重新比较当前版本。"); return; }
+    state.comparison = result;
+    const { input_changes: changes, affected_visits: impacts } = result.audit;
+    $("comparison-status").textContent = changes.length || impacts.length
+      ? `发现 ${changes.length} 项输入变化，${impacts.length} 次随访的测量依据或结果受到影响。`
+      : "两版记录未发现测量或评价差异。原文的排版差异不作为测量变化。";
+    $("comparison-summary").innerHTML = `<div class="comparison-metrics"><div><strong>${changes.length}</strong><span>输入变化</span></div><div><strong>${impacts.length}</strong><span>受影响随访</span></div></div><details class="provenance"><summary>核对两版输入标识</summary><p class="fingerprint">对照 SHA-256 · ${result.fingerprints.before}<br>当前 SHA-256 · ${result.fingerprints.current}</p></details>`;
+    const fields = { observation: "病灶观察", date: "随访日期", technique_id: "采集标识", visit: "随访增删" };
+    $("comparison-details").innerHTML = `<section class="surface"><div class="surface-head"><h3>测量记录的变化</h3></div><div class="table-scroll"><table class="comparison-table"><thead><tr><th>随访 / 病灶</th><th>项目</th><th>对照版本</th><th>当前记录</th></tr></thead><tbody>${changes.map(c => `<tr><td>${esc(c.visit_id)}<br><span class="muted">${esc(c.lesion_id || "整次随访")}</span></td><td>${esc(fields[c.field] || c.field)}</td><td>${esc(observationLabel(c.before, c.field))}</td><td>${esc(observationLabel(c.after, c.field))}</td></tr>`).join("") || '<tr><td colspan="4" class="muted">没有输入变化。</td></tr>'}</tbody></table></div></section><section class="surface"><div class="surface-head"><h3>对后续复核的影响</h3></div><div class="table-scroll"><table class="comparison-table"><thead><tr><th>随访</th><th>对照版本</th><th>当前记录</th></tr></thead><tbody>${impacts.map(v => `<tr><td>${esc(v.visit_id)}</td><td>${esc(impactLabel(v.before))}</td><td>${esc(impactLabel(v.after))}</td></tr>`).join("") || '<tr><td colspan="3" class="muted">没有受影响的随访。</td></tr>'}</tbody></table></div></section>`;
+    $("comparison-output").hidden = false;
+    message("对比已完成，可核对测量变化、最低值来源与后续影响。");
+  } catch (error) {
+    if (revision !== state.revision) { message("记录已改变，请重新比较当前版本。"); return; }
+    const details = error.comparisonResponse ? comparisonErrors(error.comparisonResponse) : [];
+    $("comparison-status").textContent = [error.message, ...details].join("\n");
+    message(error.message, true);
+  } finally { state.busy = false; updateButtons(); }
+});
+bind("export-comparison", () => {
+  if (!state.comparison) throw new Error("请先比较当前记录。");
+  const format = $("comparison-format").value;
+  download("target-revision." + (format === "markdown" ? "md" : format), state.comparison.outputs[format]);
+});
+bind("export-session", async () => {
+  const revision = state.revision;
+  state.busy = true; updateButtons();
+  try {
+    const text = await makeSession(state.baseline, source(), $("language").value);
+    if (revision !== state.revision) throw new Error("生成会话期间记录已改变，请重新导出。");
+    download("lesion-followup-session.json", text, "application/json");
+    message("复核会话已导出，对照版本与当前原始输入均已保留。");
+  } finally { state.busy = false; updateButtons(); }
+});
+bind("import-session", async () => {
+  const file = $("session-file").files[0];
+  if (!file) throw new Error("请选择复核会话文件。");
+  const revision = state.revision;
+  state.busy = true; updateButtons();
+  try {
+    const session = await readSession(await file.text());
+    if (revision !== state.revision) throw new Error("读取会话期间记录已改变，请重新载入。");
+    $("language").value = session.language;
+    replaceSources(session.current, session.before);
+    state.saved = null;
+    showView("compare");
+    $("input-status").textContent = file.name;
+    message("会话已载入，请重新比较或生成报告，以核对当前记录。");
+  } finally { state.busy = false; updateButtons(); }
+});
+
 window.addEventListener("pagehide", () => urls.forEach(url => URL.revokeObjectURL(url)));
 
 try {

@@ -34,6 +34,9 @@ fn report_result(format : String, content : String) -> Json {
 ///|
 fn dispatch(request : Request) -> Json {
   let action = Json::string(request.action)
+  if request.action == "compare" {
+    return dispatch_comparison(request)
+  }
   if request.action == "template" {
     // The name has already been checked at the request boundary.
     let files = @lib.input_template_files(

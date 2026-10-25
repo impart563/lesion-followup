@@ -82,6 +82,28 @@ does not select a default. `language` defaults to `en` and accepts `en` or `zh-C
 | `preflight` | `study_json`, `followup_csv` | `language`, `format` = `json` | Input checks without response categories |
 | `template` | None | `language`, `template` = `multi` | Matched synthetic files |
 | `editor` | `study_json`, `followup_csv` | `language` | Parsed study and editable CSV cells, with preflight |
+| `compare` | `study_json`, `followup_csv`, `compare_study_json`, `compare_followup_csv` | `language`, `format` = `json` | Existing revision report text |
+
+`compare` uses `compare_*` as the original version and unprefixed fields as the
+current version. It accepts `json`, `markdown` or `html`. Its envelope retains
+`schema_version: 1` and `scope: target_lesions_only`, with `preflight` containing
+two independent existing reports under `before` and `after`. Invalid inputs
+return `ok: false`, `error_kind: input`, empty top-level diagnostics and no result.
+Incompatible baseline profiles return `error_kind: comparison` and the core's
+`revision_baseline` diagnostic. Successful results use the existing format,
+media type and content shape. All other actions retain their original contracts.
+
+```js
+const result = JSON.parse(evaluate(JSON.stringify({
+  schema_version: 1, action: "compare", language: "zh-CN", format: "json",
+  study_json: currentStudyText, followup_csv: currentCsvText,
+  compare_study_json: originalStudyText, compare_followup_csv: originalCsvText
+})));
+```
+
+The workbench's example catalogue is bundled at build time in `examples.mjs`;
+it performs no runtime fetch. Portable two-version sessions are a separate
+presentation/persistence contract documented in the [workbench guide](workbench.md).
 
 `review` accepts `json`, `csv`, `markdown`, `svg` and `html`. `preflight` accepts
 `json` and `markdown`. `template` accepts `single` or `multi` and returns
@@ -123,10 +145,13 @@ describe the response variants.
 | State | `action` | `ok` | `error_kind` | `preflight` | `result` |
 | --- | --- | --- | --- | --- | --- |
 | Invalid request | `null` | `false` | `request` | `null` | `null` |
-| Invalid study/CSV input | Requested action | `false` | `input` | Full report | `null` |
+| Invalid study/CSV input (review/preflight/editor) | Requested action | `false` | `input` | Full report | `null` |
 | Valid review/preflight | Requested action | `true` | `null` | Full report | Format/media type/content |
 | Valid template | `template` | `true` | `null` | `null` | `files: [{name, content}]` |
 | Editable input shape | `editor` | `true` | `null` | Full report, possibly `valid: false` | `study`, `rows` |
+| Comparison input failure | `compare` | `false` | `input` | `before` and `after` reports | `null` |
+| Incompatible comparison profiles | `compare` | `false` | `comparison` | `before` and `after` reports | `null` |
+| Valid comparison | `compare` | `true` | `null` | `before` and `after` reports | Format/media type/content |
 
 For `editor`, `ok: true` means the table shape can be edited. It does not mean
 the clinical inputs are valid or evaluable. The caller must gate review on the
@@ -136,14 +161,14 @@ when preflight has errors, and retracts stale outputs immediately after any edit
 For request errors, `diagnostics` contains a `code`, JSON `field` path and
 English `message`. Codes are `request_json`, `request_schema`, `request_version`,
 `request_action`, `request_language`, `request_format` and `request_template`.
-The adapter returns one request diagnostic. For recognized requests,
-`diagnostics` is empty: existing parse diagnostics and structural issues retain
+The adapter returns one request diagnostic. For recognized requests other than
+incompatible-profile comparisons, `diagnostics` is empty: existing parse diagnostics and structural issues retain
 their codes, messages and locations inside `preflight.diagnostics` and
 `preflight.input_issues`. This avoids duplicating or relabeling source errors.
 
-Review hints stay in `preflight.review_hints`. A valid NE observation therefore
+Review hints stay in the relevant preflight report's `review_hints`. A valid NE observation therefore
 has `ok: true`; NE does not become a request or input error. Invalid input never
-returns a partial clinical report. `preflight.valid` concerns parse/structural
+returns a partial clinical report. Each preflight report's `valid` concerns parse/structural
 checks and does not establish clinical comparability or overall response.
 
 Report `content` is byte-for-byte equal to the corresponding CLI stdout for

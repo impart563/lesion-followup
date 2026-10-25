@@ -10,7 +10,10 @@ export type BrowserRequest =
   | { schema_version: 1; action: "template"; template?: "single" | "multi";
       language?: "en" | "zh-CN" }
   | { schema_version: 1; action: "editor"; study_json: string; followup_csv: string;
-      language?: "en" | "zh-CN" };
+      language?: "en" | "zh-CN" }
+  | { schema_version: 1; action: "compare"; study_json: string; followup_csv: string;
+      compare_study_json: string; compare_followup_csv: string;
+      language?: "en" | "zh-CN"; format?: "json" | "markdown" | "html" };
 
 export interface ReviewNotice {
   code: string; message: string; source: string; field: string | null;
@@ -38,4 +41,9 @@ export type BrowserResponse = Envelope & (
       diagnostics: []; preflight: null; result: TemplateResult }
   | { ok: true; action: "editor"; error_kind: null;
       diagnostics: []; preflight: Preflight; result: EditorResult }
+  | { ok: true; action: "compare"; error_kind: null; diagnostics: [];
+      preflight: { before: Preflight; after: Preflight }; result: ReportResult }
+  | { ok: false; action: "compare"; error_kind: "input" | "comparison";
+      diagnostics: { code: string; message: string; field: string | null; line: number | null; column: number | null }[];
+      preflight: { before: Preflight; after: Preflight }; result: null }
 );

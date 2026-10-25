@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Add workbench selection of the complete synthetic example collection, including
+  a paired revision example with its original comparison version.
+- Add a strict browser comparison action with independent input preflights and
+  native-equivalent JSON, Markdown and HTML revision reports.
+- Add a workbench comparison view with fixed reference inputs, measurement and
+  downstream evidence, source fingerprints and immediate stale-result withdrawal.
+- Add portable review sessions that retain both source pairs and unfinished text,
+  verify a canonical SHA-256 payload, and recompute evidence after restoration.
+
 ## 0.2.0 — release candidate, 2026-10-25
 
 - Added a reproducible four-case collection with hand-calculated expectations,

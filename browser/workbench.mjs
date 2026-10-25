@@ -59,10 +59,77 @@ export async function createReview(evaluate, sources, language) {
     outputs[format] = response.result.content;
     quality = response.preflight;
   }
-  const bytes = new TextEncoder().encode(JSON.stringify([sources.study_json, sources.followup_csv]));
-  const hash = new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", bytes));
-  const fingerprint = Array.from(hash, b => b.toString(16).padStart(2, "0")).join("");
+  const fingerprint = await sourceFingerprint(sources);
   return { audit: JSON.parse(outputs.json), outputs, quality, fingerprint };
+}
+
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(text);
+  const hash = new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", bytes));
+  return Array.from(hash, b => b.toString(16).padStart(2, "0")).join("");
+}
+
+export function sourceFingerprint(sources) {
+  return sha256(JSON.stringify([sources.study_json, sources.followup_csv]));
+}
+
+export async function createComparison(evaluate, before, current, language) {
+  const outputs = {};
+  for (const format of ["json", "markdown", "html"]) {
+    const response = invoke(evaluate, { action: "compare", ...current,
+      compare_study_json: before.study_json, compare_followup_csv: before.followup_csv, language, format });
+    if (!response.ok) {
+      const error = new Error(response.error_kind === "comparison"
+        ? "两版记录的研究标识、基线或靶病灶配置不一致，请核对对照版本。"
+        : "部分输入需要修正，请核对两版记录的检查结果。");
+      error.comparisonResponse = response;
+      throw error;
+    }
+    outputs[format] = response.result.content;
+  }
+  const fingerprints = { before: await sourceFingerprint(before), current: await sourceFingerprint(current) };
+  return { audit: JSON.parse(outputs.json), outputs, fingerprints };
+}
+
+function sourcePair(value) {
+  if (!value || Array.isArray(value) || typeof value !== "object" ||
+      Object.keys(value).length !== 2 || !Object.keys(value).every(k => ["study_json", "followup_csv"].includes(k)) ||
+      typeof value.study_json !== "string" || typeof value.followup_csv !== "string") {
+    throw new Error("会话中的原始输入字段不完整，当前记录保持不变。");
+  }
+  return { study_json: value.study_json, followup_csv: value.followup_csv };
+}
+
+function sessionPayload(value) {
+  const keys = ["schema_version", "kind", "saved_at", "language", "before", "current"];
+  if (!value || Array.isArray(value) || typeof value !== "object" || value.schema_version !== 1 ||
+      value.kind !== "lesion-followup-session" || !["en", "zh-CN"].includes(value.language) ||
+      typeof value.saved_at !== "string" || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(value.saved_at) ||
+      !Number.isFinite(Date.parse(value.saved_at)) || new Date(value.saved_at).toISOString() !== value.saved_at ||
+      Object.keys(value).length !== keys.length || !Object.keys(value).every(k => keys.includes(k))) {
+    throw new Error("会话类型、版本或字段不受支持，当前记录保持不变。");
+  }
+  return { schema_version: 1, kind: "lesion-followup-session", saved_at: value.saved_at,
+    language: value.language, before: value.before === null ? null : sourcePair(value.before), current: sourcePair(value.current) };
+}
+
+export async function makeSession(before, current, language, saved_at = new Date().toISOString()) {
+  const payload = sessionPayload({ schema_version: 1, kind: "lesion-followup-session", saved_at, language, before, current });
+  return JSON.stringify({ ...payload, sha256: await sha256(JSON.stringify(payload)) }, null, 2) + "\n";
+}
+
+export async function readSession(text) {
+  let value;
+  try { value = JSON.parse(text); } catch { throw new Error("会话文件不是有效 JSON，当前记录保持不变。"); }
+  if (!value || typeof value.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(value.sha256)) {
+    throw new Error("会话缺少有效的完整性摘要，当前记录保持不变。");
+  }
+  const { sha256: expected, ...fields } = value;
+  const payload = sessionPayload(fields);
+  if (await sha256(JSON.stringify(payload)) !== expected) {
+    throw new Error("会话内容与完整性摘要不一致，当前记录保持不变。");
+  }
+  return payload;
 }
 
 export function escapeHtml(text) {
@@ -89,5 +156,5 @@ export function printFragment(document) {
   const style = document.match(/<style>([\s\S]*?)<\/style>/)?.[1];
   const body = document.match(/<body[^>]*>([\s\S]*?)<\/body>/)?.[1];
   if (!style || !body) throw new Error("打印文档不完整。");
-  return `<style>:host{display:block;font:14px/1.6 system-ui,sans-serif;color:#263348}@media print{:host{font-size:10pt}}${style}</style>${body}`;
+  return `<style>:host{display:block;background:#fff;font:14px/1.6 system-ui,sans-serif;color:#263348}@media print{:host{font-size:10pt}}${style}</style>${body}`;
 }
