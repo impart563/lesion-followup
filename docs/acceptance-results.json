@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-25T09:49:24.077451+00:00",
+  "checked_at_utc": "2026-10-26T00:37:16.755799+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,8 +12,8 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "136533c1527f6e3b1a77de37ca17a264576e257504e0f32a7d46b68de6f212fa",
-  "source_file_count": 124,
+  "source_sha256": "b8cc7720218c95cd80ee101d550f690b91ebd9d1a4ac974c410e0553b120de84",
+  "source_file_count": 129,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -105,6 +105,21 @@
       "bilingual documents retain pending work, literal notes and scope without active content"
     ],
     "independent_python_payload_hash": true
+  },
+  "handoff": {
+    "status": "passed",
+    "native_report_file_comparisons": 20,
+    "rejected_archives": 13,
+    "receiver_applies": 2,
+    "checks": [
+      "four bilingual LF/Unicode-CRLF handoffs match twenty independent native report files",
+      "fixed-time export is deterministic and preserves both versions, note states, Unicode and exact binding",
+      "missing/extra/tampered files, strict manifests, nested session/note mismatch and valid-but-unrelated reports are rejected",
+      "receiver applies only validated snapshots and rejects newer edits, replacement files, concurrent inspections and read failures"
+    ],
+    "independent_python_manifest_hashes": true,
+    "independent_deflate_fixtures": 2,
+    "native_verified_exported_bundles": 4
   },
   "example_collection": {
     "status": "passed",
@@ -229,6 +244,9 @@
     "human review: native hint parity, independent viewing states, source binding and unchanged clinical evidence",
     "review note persistence: strict version/hash/context, malformed records, limits and backward clock handling",
     "review note documents: bilingual HTML/Markdown, pending items, literal untrusted text and matching fingerprints",
+    "complete handoff export: bilingual native bytes, raw source pairs, optional notes and independent manifest hashes",
+    "handoff reception: strict files, nested integrity, source/note binding and complete native report regeneration",
+    "handoff restore: atomic apply, no-note clearing, stale edits, changed files and concurrent inspection rejection",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends"
@@ -287,7 +305,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 224,
+  "command_count": 232,
   "commands": [
     {
       "command": "moon version --all",
@@ -1226,6 +1244,46 @@
     },
     {
       "command": "moon run --target native cmd/demo -- --study examples/study.json --input <temporary>/multiple-hints.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang en --bundle <temporary>/lf-en",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --bundle <temporary>/lf-zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang en --bundle <temporary>/unicode-crlf-en",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --bundle <temporary>/unicode-crlf-zh-CN",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/export-0 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/export-1 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/export-2 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/export-3 --format json",
       "cwd": ".",
       "exit_code": 0
     },
