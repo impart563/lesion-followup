@@ -337,6 +337,12 @@ and nine invalid candidate IDs are rejected, including recomputed outer hashes
 with mismatched content, unsafe paths, old manifest versions and missing files.
 No publish command is part of acceptance or candidate preparation.
 
+An additional disposable module copies the real `.moonignore` policy and places
+ten root/nested archives, backups, caches and development-only files beside a
+minimal public source. An actual `moon package --list` run retains the required
+module files and excludes all ten local artifacts. The real module archive is
+also checked for nested ZIPs, Git bundles and Python caches.
+
 On 2026-10-26 the Windows in-app browser exercised per-target baseline context,
 precision/reason rejection, state-dependent fields, change preview, explicit
 save, exact one-step undo and redo. A saved NE observation retained its multiline

@@ -1,10 +1,31 @@
 """Exercise candidate verification with real packaged sources and deliberate corruption."""
 from pathlib import Path
-import json,tempfile
+import json,tempfile,subprocess
 from zipfile import ZipFile,ZIP_DEFLATED
 from verify_release import BROWSER_FILES,candidate_id,digest,verify_release
 
 ROOT=Path(__file__).resolve().parents[1]
+
+def verify_publish_filter(moon,environment,passed):
+    with tempfile.TemporaryDirectory(prefix='publish filter ') as temporary:
+        folder=Path(temporary)
+        (folder/'moon.mod').write_text('name = "impart563/publish-filter-fixture"\nversion = "0.0.0"\nreadme = "README.md"\nlicense = "Apache-2.0"\n',encoding='utf-8')
+        (folder/'moon.pkg').write_text('',encoding='utf-8')
+        (folder/'marker.mbt').write_text('///|\npub fn marker() -> Int { 1 }\n',encoding='utf-8')
+        (folder/'README.md').write_text('Synthetic publication-filter fixture.\n',encoding='utf-8')
+        (folder/'LICENSE').write_bytes((ROOT/'LICENSE').read_bytes())
+        (folder/'.moonignore').write_bytes((ROOT/'.moonignore').read_bytes())
+        forbidden=['old-source.zip','nested/backup.zip','backup.bundle','__pycache__/local.pyc','nested/__pycache__/local.pyc','scripts/private.txt','.github/ci.yml','.repos/foreign.txt','target/cache.txt','nested/_build/cache.txt']
+        for name in forbidden:
+            path=folder/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text('synthetic local artifact',encoding='utf-8')
+        result=subprocess.run([moon,'package','--list'],cwd=str(folder),env=environment,capture_output=True,text=True,encoding='utf-8',timeout=180)
+        if result.returncode: raise RuntimeError('publish-filter fixture failed:\n'+result.stderr)
+        with ZipFile(folder/'_build/publish/impart563-publish-filter-fixture-0.0.0.zip') as archive:
+            names=set(name.replace('\\','/') for name in archive.namelist())
+        assert {'marker.mbt','moon.mod','moon.pkg','README.md','LICENSE'}.issubset(names)
+        assert not names.intersection(forbidden),names.intersection(forbidden)
+    passed('publication filters: actual packaging excludes root/nested archives, local caches and development-only files')
+    return {'status':'passed','rejected_local_files':len(forbidden),'commands':[{'command':'moon package --list','cwd':'<publish-filter-fixture>','exit_code':0}]}
 
 def verify_release_contract(package,consumer,paths,fingerprint,count,passed):
     for value in ('rc.1','rc.2','rc.999999'): assert candidate_id(value)==value

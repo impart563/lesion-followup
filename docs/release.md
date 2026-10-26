@@ -58,6 +58,12 @@ python scripts/verify_release.py _build/release-0.2.0-rc.2
 浏览器运行文件和本地导入是否完整，以及记录中的消费验证是否齐备。它核对本地候选的一致性，
 不认证作者身份，也不查询 registry 的实际发布状态。重新打包不代表重新发布。
 
+模块归档使用仓库的 `.moonignore` 发布策略，明确排除旧 ZIP、Git 历史备份、构建缓存、Python
+缓存、开发脚本和独立消费工作区。该文件与 `.gitignore` 不会叠加，不能仅凭 Git 工作树干净
+判断待发布内容。验收会在临时模块中放入根目录及嵌套的本地产物，实际打包并确认它们被排除。
+策略依据[官方发布文件规则](https://docs.moonbitlang.com/en/stable/toolchain/moon/module.html#publishing-files-with-moonignore)，
+也可用本机 `moon package --list` 查看当前工具链实际会打包的文件。
+
 浏览器包解压后，在该目录运行 `python serve_browser.py --port 8765` 并打开 `http://127.0.0.1:8765/`。随包启动脚本固定 ES module 的 MIME 类型，兼容 Windows 的系统文件类型差异，并仅监听本机。需支持 ES modules、Web Crypto 和本地文件选择的现代浏览器；不能直接双击 `index.html` 代替 HTTP 入口。浏览器内导出和本地草稿的限制见工作区说明。
 
 ## 发布状态与正式发布步骤

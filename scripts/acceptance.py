@@ -28,7 +28,7 @@ from review_notes_acceptance import verify_review_notes
 from handoff_acceptance import verify_handoff
 from visit_editing_acceptance import verify_visit_editing
 from observation_acceptance import verify_observations
-from release_acceptance import verify_release_contract
+from release_acceptance import verify_release_contract, verify_publish_filter
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -484,6 +484,7 @@ def main():
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
     require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "observation-editor.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
+    require(not any(entry.lower().endswith((".zip", ".bundle", ".pyc")) or "__pycache__" in entry.split("/") for entry in entries), "local archives or Python caches leaked into module")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
     candidate_consumer = verify_candidate_consumer(package_path, moon, environment)
@@ -491,6 +492,8 @@ def main():
     passed("independent extracted-candidate consumer on four backends")
     fingerprint, source_files = source_digest()
     release_candidate = verify_release_contract(package_path, candidate_consumer, source_paths(), fingerprint, source_files, passed)
+    publish_filter = verify_publish_filter(moon, environment, passed)
+    commands.extend(publish_filter["commands"])
     record = {
         "status": "passed",
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -512,6 +515,7 @@ def main():
         "visit_editing": visit_editing,
         "observations": observations,
         "release_candidate": release_candidate,
+        "publish_filter": publish_filter,
         "example_collection": examples,
         "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,
