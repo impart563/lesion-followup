@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add complete per-target observation entry with baseline context, state-specific
+  fields, core validation, before/after preview and one-step input-history restore.
+- Extend the independent consumer to text parsing/preflight, valid NE handling,
+  bilingual bundles and tamper rejection on all four supported backends.
+- Refresh candidate preparation to rc.2 with version-2 source-count manifests
+  and a standalone verifier for source/module/browser consistency and checksums.
+
 - Add whole-visit creation with one blank missing observation per baseline
   target, and previewed metadata updates/removal validated by the MoonBit core.
 - Add current-input undo/redo with focused-field grouping, bounded in-memory

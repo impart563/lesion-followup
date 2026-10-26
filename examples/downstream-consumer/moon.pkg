@@ -1,2 +1,6 @@
-import { "impart563/lesion-followup" @lib }
+import {
+  "impart563/lesion-followup" @lib,
+  "moonbitlang/core/encoding/utf8",
+}
+
 pkgtype(kind: "executable")

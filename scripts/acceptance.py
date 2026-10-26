@@ -27,6 +27,8 @@ from delivery_acceptance import verify_delivery
 from review_notes_acceptance import verify_review_notes
 from handoff_acceptance import verify_handoff
 from visit_editing_acceptance import verify_visit_editing
+from observation_acceptance import verify_observations
+from release_acceptance import verify_release_contract
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -468,6 +470,7 @@ def main():
     review_notes = verify_review_notes(cli, environment, passed)
     handoff = verify_handoff(cli, environment, passed)
     visit_editing = verify_visit_editing(cli, environment, passed)
+    observations = verify_observations(cli, environment, passed)
     with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
         collection = Path(directory) / "复核 示例"
         examples = reproduce(collection, cli)
@@ -479,7 +482,7 @@ def main():
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
-    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "workbench.css")), "browser workbench sources missing from module archive")
+    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "observation-editor.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
@@ -487,6 +490,7 @@ def main():
     commands.extend(candidate_consumer["commands"])
     passed("independent extracted-candidate consumer on four backends")
     fingerprint, source_files = source_digest()
+    release_candidate = verify_release_contract(package_path, candidate_consumer, source_paths(), fingerprint, source_files, passed)
     record = {
         "status": "passed",
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -506,6 +510,8 @@ def main():
         "review_notes": review_notes,
         "handoff": handoff,
         "visit_editing": visit_editing,
+        "observations": observations,
+        "release_candidate": release_candidate,
         "example_collection": examples,
         "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,

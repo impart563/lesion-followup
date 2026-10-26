@@ -42,10 +42,11 @@ def verify_candidate_consumer(package, moon, environment):
         for backend in ("wasm", "wasm-gc", "js", "native"):
             result = subprocess.run([moon, "run", "--target", backend, "."], cwd=str(consumer), env=env,
                                     capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
-            if result.returncode or "Downstream consumer smoke passed: node CR retains 9.9 mm" not in result.stdout:
+            if result.returncode or "Downstream consumer smoke passed: node CR retains 9.9 mm" not in result.stdout or "Downstream integration passed: text input, preflight, target-only NE, bilingual bundles and tamper rejection" not in result.stdout:
                 raise RuntimeError("candidate consumer " + backend + "\n" + result.stdout + result.stderr)
             outputs[backend] = "passed"
             commands.append({"command": "moon run --target " + backend + " .", "cwd": "<extracted-candidate-consumer>", "exit_code": result.returncode})
         return {"source": "extracted Mooncakes candidate; no checkout library link", "backends": outputs,
+                "checks": ["typed root-facade construction", "text template/parsing/preflight/replay", "invalid input and valid NE remain separate", "bilingual native bundles and tamper rejection"],
                 "commands": commands,
                 "registry_install": "not performed; candidate is unpublished"}

@@ -36,6 +36,29 @@ revision withdraw the prior apply action; errors never partially change input.
 An accepted edit retracts earlier reports, comparisons and handoff previews.
 Input-bound human notes follow the existing stale-record behavior.
 
+## Per-target observation form
+
+The observation form is another previewed whole-visit operation. It lists every
+ordered baseline target, including a target omitted from the selected visit,
+whose initial form state is `missing` with empty values. It retains the current
+visit's ID/date/acquisition identifier and leaves all other visits unchanged.
+Saving replaces that visit's rows in baseline-target order and preserves the
+study JSON string. Existing CSV record separators are serialized as for the
+other table operations.
+
+The form writes diameter only for `measured`, and reason only for
+`not_evaluable`. Switching state retains temporary field text while editing,
+but inapplicable values are omitted from the candidate. The change preview shows
+the original and proposed observation, including removed values. The core checks
+state/value compatibility, exact precision and required reasons; the UI does
+not calculate a response or fill a missing diameter. All five observation
+states retain their existing semantics. A missing observation is not zero.
+
+The operation requires exactly one string-valued entry per baseline target.
+Unknown/duplicate targets, omitted entries and extra fields are rejected. A
+failed or stale preview cannot partially apply. One save is one input-history
+step; the existing report, comparison and note-binding invalidation rules apply.
+
 ## Current-input undo and redo
 
 History contains exact `study_json` and `followup_csv` strings. Both raw-file

@@ -1,5 +1,6 @@
 // Shape edits only. MoonBit validates every proposed track; no measurements are inferred.
 import { invoke, serializeTable } from "./workbench.mjs";
+import { prepareObservationEdit } from "./observation-editor.mjs";
 
 const exact = (value, keys) => value && typeof value === "object" && !Array.isArray(value) &&
   Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
@@ -15,6 +16,7 @@ export function visitSummaries(model) {
 }
 
 export function prepareVisitEdit(evaluate, sources, operation) {
+  if (operation?.kind === "observations") return prepareObservationEdit(evaluate, sources, operation);
   const keys = operation?.kind === "remove" ? ["kind", "visit_id"] : operation?.kind === "append" ?
     ["kind", "id", "date", "technique_id"] : ["kind", "visit_id", "id", "date", "technique_id"];
   if (!exact(operation, keys) || !["append", "update", "remove"].includes(operation.kind) ||

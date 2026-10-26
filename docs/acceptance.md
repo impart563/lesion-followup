@@ -313,3 +313,37 @@ two added observations retained `missing` and empty diameters. The five-visit
 audit JSON matched a fresh native CLI output byte for byte. The existing desktop
 viewport and visit dialog were reviewed visually. No mobile or native printing
 check is claimed. These are software checks using synthetic inputs.
+
+## Observation entry and distribution acceptance
+
+The unified suite runs `observation_acceptance.py`. Four independent native
+preflights and 20 native report files match complete observation-form edits,
+covering all five states, omitted targets and Unicode/multiline CRLF reasons.
+Twenty invalid operations reject unknown/duplicate targets, incomplete fields,
+precision overflow, incompatible values and missing reasons. The source study
+text and other visits stay unchanged. Planner tests cover explicit apply,
+isolated previews and withdrawal after edits or failure.
+
+The extracted-candidate consumer now runs typed construction, template/text
+parsing, preflight, valid NE, bilingual bundles and tamper rejection on all four
+backends. It consumes the actual module archive without a checkout-library link;
+this does not establish registry installation of this module.
+
+`release_acceptance.py` builds local candidate-contract fixtures from actual
+packaged sources and runtime files. It checks three archives, source commit and
+fingerprint, module/source agreement, the complete browser runtime/import set,
+four-backend consumer evidence and checksum entries. Eleven corrupt candidates
+and nine invalid candidate IDs are rejected, including recomputed outer hashes
+with mismatched content, unsafe paths, old manifest versions and missing files.
+No publish command is part of acceptance or candidate preparation.
+
+On 2026-10-26 the Windows in-app browser exercised per-target baseline context,
+precision/reason rejection, state-dependent fields, change preview, explicit
+save, exact one-step undo and redo. A saved NE observation retained its multiline
+reason and removed its inapplicable diameter. Form edits and switching visits
+withdrew prior apply actions. A measured revision changed week-4 T1 to 9.0 mm;
+actual JSON/CSV input and audit downloads were independently inspected with
+Python. Only that measurement changed, and the audit matched a fresh native
+output byte for byte, retaining PR/PR/PD/NE and week-6 prior minimum 19.0 mm.
+The desktop dialog is visually reviewed; no mobile or native-print check is
+claimed. All inputs remain synthetic, and results concern target lesions only.

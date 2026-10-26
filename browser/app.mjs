@@ -230,7 +230,7 @@ function renderTables() {
       <div class="surface-head"><div><h3>基线靶病灶</h3><p>非淋巴结记录最长径，淋巴结记录短轴。</p></div><button id="add-target" class="quiet">＋ 添加病灶</button></div>
       <div class="table-scroll"><table class="target-table"><thead><tr><th>病灶编号</th><th>器官组</th><th>病灶类型</th><th>基线直径 mm</th><th></th></tr></thead><tbody>${targetRows}</tbody></table></div>
     </details>
-    <section class="surface"><div class="surface-head visit-table-head"><div><h2>随访观察</h2><p>逐次核对测量值，保留未测量与无法评价的原始观察。</p></div><div class="visit-table-actions"><button id="new-visit" class="secondary">＋ 新增随访</button><button id="manage-visit" class="quiet">管理随访</button><label class="compact-label">随访<select id="visit-filter" aria-label="筛选随访"><option value="all">全部随访</option>${visits.map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("")}</select></label></div></div>
+    <section class="surface"><div class="surface-head visit-table-head"><div><h2>随访观察</h2><p>逐次核对测量值，保留未测量与无法评价的原始观察。</p></div><div class="visit-table-actions"><button id="new-visit" class="secondary">＋ 新增随访</button><button id="enter-observations" class="secondary">录入本次观察</button><button id="manage-visit" class="quiet">管理随访</button><label class="compact-label">随访<select id="visit-filter" aria-label="筛选随访"><option value="all">全部随访</option>${visits.map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("")}</select></label></div></div>
       <div class="table-scroll"><table class="observation-table"><thead><tr>${inputNames.map(n => `<th>${n}</th>`).join("")}<th></th></tr></thead><tbody>${observationRows}</tbody></table></div>
       <div class="table-foot"><button id="add-row" class="quiet">＋ 添加观察</button><p class="muted">${state.model.rows.length} 条观察 · 直径最多一位小数</p></div>
     </section>`;
@@ -256,11 +256,13 @@ function renderTables() {
   $("add-target").addEventListener("click", () => { study.targets.push({ id: "", organ: "", kind: "non_nodal", baseline_mm: "" }); redraw(); });
   $("add-row").addEventListener("click", () => { state.model.rows.push(["", "", study.technique_id, "", "missing", "", ""]); redraw(); });
   $("new-visit").addEventListener("click", () => visitController.open("append"));
-  $("manage-visit").addEventListener("click", () => {
+  const openSelectedVisit = mode => {
     const index = $("visit-filter").value;
     const currentVisits = [...new Set(state.model.rows.map(row => row[0]))];
-    visitController.open("update", index === "all" ? currentVisits.at(-1) : currentVisits[Number(index)]);
-  });
+    visitController.open(mode, index === "all" ? currentVisits.at(-1) : currentVisits[Number(index)]);
+  };
+  $("manage-visit").addEventListener("click", () => openSelectedVisit("update"));
+  $("enter-observations").addEventListener("click", () => openSelectedVisit("observations"));
   visitController?.refresh();
 }
 
@@ -599,14 +601,14 @@ visitController = mountVisitEditor({ getEvaluate: () => state.evaluate, getSourc
   getRevision: () => JSON.stringify([state.revision, reviewNotesController.version()]), getBusy: () => state.busy,
   noticeText, notify: message,
   apply: ({ sources, summary }) => {
-    const labels = { append: "新增随访", update: "修改随访信息", remove: "移除整次随访" };
+    const labels = { append: "新增随访", update: "修改随访信息", remove: "移除整次随访", observations: "录入本次观察" };
     history.record(sources, labels[summary.kind]);
     writeSources(sources); applySources(); showView("records");
     if (summary.kind !== "remove") {
       const visits = [...new Set(state.model.rows.map(row => row[0]))];
       $("visit-filter").value = String(visits.indexOf(summary.id)); filterRows();
     }
-    message(summary.kind === "append" ? "随访已新增，各靶病灶保留为未测量，请补充本次观察。" : summary.kind === "remove" ? "本次随访已移除，可通过“撤销修改”恢复。" : "本次随访信息已同步更新，测量值与说明已保留。");
+    message(summary.kind === "append" ? "随访已新增，各靶病灶保留为未测量，请补充本次观察。" : summary.kind === "remove" ? "本次随访已移除，可通过“撤销修改”恢复。" : summary.kind === "observations" ? "本次观察已保存，可撤销这次录入，或重新生成报告。" : "本次随访信息已同步更新，测量值与说明已保留。");
   },
 });
 

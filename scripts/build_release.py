@@ -11,6 +11,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from acceptance import source_digest
 from build_browser import main as build_browser
 from distribution import module_version, verify_candidate_consumer
+from verify_release import BROWSER_FILES, candidate_id, verify_release
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,10 +19,12 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "_build/release")
-    parser.add_argument("--candidate", default="rc.1")
+    parser.add_argument("--candidate", default="rc.2")
     args = parser.parse_args()
-    if args.candidate != "rc.1":
-        parser.error("this release plan uses rc.1")
+    try:
+        candidate_id(args.candidate)
+    except ValueError as error:
+        parser.error(str(error))
     env = dict(os.environ, MOON_WORK="off")
 
     def git(*arguments):
@@ -47,19 +50,21 @@ def main():
     browser = output / (stem + "-browser.zip")
     # Explicit runtime allowlist: no acceptance fixtures, drafts or local screenshots.
     with ZipFile(browser, "w", ZIP_DEFLATED) as archive:
-        for name in ("index.html", "smoke.html", "browser.js", "browser.d.ts", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "examples.mjs", "workbench.css", "package.json", "serve_browser.py"):
+        for name in BROWSER_FILES:
             archive.write(ROOT / "_build/browser" / name, name)
         archive.write(ROOT / "LICENSE", "LICENSE")
         archive.write(ROOT / "docs/workbench.md", "WORKBENCH.md")
     files = [package, source, browser]
-    manifest = {"schema_version": 1, "version": version, "candidate": args.candidate, "git_commit": git("rev-parse", "HEAD"),
-                "source_sha256": record["source_sha256"], "candidate_consumer": consumer,
+    manifest = {"schema_version": 2, "version": version, "candidate": args.candidate, "git_commit": git("rev-parse", "HEAD"),
+                "source_sha256": record["source_sha256"], "source_file_count": record["source_file_count"], "candidate_consumer": consumer,
                 "publication": {"github": "candidate prepared; publication not performed by this script",
                                 "mooncakes": "not published", "registry_install": "not performed"},
                 "artifacts": [{"name": p.name, "sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "bytes": p.stat().st_size} for p in files]}
     (output / "release-manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     files.append(output / "release-manifest.json")
     (output / "SHA256SUMS").write_text("".join(hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n" for p in files), encoding="utf-8")
+    verification = verify_release(output)
+    (output / "verification.json").write_text(json.dumps(verification, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("Release candidate prepared: " + str(output))
 
 

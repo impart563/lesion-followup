@@ -61,6 +61,10 @@ Whole-visit editing adds blank observations for every baseline target, updates
 shared visit information and removes visits after preview. Current-input undo
 and redo retain exact text within a bounded in-memory history; see the
 [editing contract](docs/input-editing.md).
+The per-target form records one visit's observation states, measured diameters
+or reader limitations together, with a change preview and atomic save.
+External projects can follow the [integration guide](docs/integration.md),
+which distinguishes extracted-candidate validation from registry installation.
 
 ### Prepare and check inputs
 
