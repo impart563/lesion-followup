@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-26T03:45:10.209695+00:00",
+  "checked_at_utc": "2026-10-26T04:33:54.410300+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,8 +12,8 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "73ee426bb7f87cb45c84f7456899cc8778707cea139ef1e354026b499d50bd70",
-  "source_file_count": 141,
+  "source_sha256": "fafbc51ecd3c21b26b9fdad896e25a2aa0f2fa9712e1be122aa50bef8875d31d",
+  "source_file_count": 144,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -147,10 +147,16 @@
     "native_preflight_comparisons": 4,
     "native_report_comparisons": 20
   },
+  "record_navigation": {
+    "search": "passed",
+    "navigation": "passed",
+    "source_and_report_preservation": "passed",
+    "omitted_target": "passed"
+  },
   "release_candidate": {
     "status": "passed",
     "archives": 3,
-    "browser_runtime_files": 20,
+    "browser_runtime_files": 21,
     "rejected_candidates": 11,
     "rejected_candidate_ids": 9,
     "checks": [
@@ -269,7 +275,7 @@
         "exit_code": 0
       }
     ],
-    "registry_install": "not performed; candidate is unpublished"
+    "registry_install": "not performed by this check; extracted candidate only"
   },
   "workflow_checks": [
     "format, warning-free checks, native build, four-target tests and public interfaces",
@@ -309,6 +315,7 @@
     "input edit history: coalescing, exact raw restoration, bounded retention, branching and external-load reset",
     "per-target observations: complete target forms, five states, precise values and reasons match native preflight/reports",
     "observation apply: unchanged surrounding visits, explicit changes, strict schema and stale-preview rejection",
+    "observation search, hint navigation and unchanged inputs/reports",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends",
