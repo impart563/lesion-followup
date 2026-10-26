@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-26T02:21:39.347625+00:00",
+  "checked_at_utc": "2026-10-26T03:38:08.979856+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,8 +12,8 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "5a96972fde056e4ab9e5f040f0ca938f325f054a9adc54622104d5efbe2f015c",
-  "source_file_count": 135,
+  "source_sha256": "06a02957f54dd9f725827ddbd5d429d70c68ae1b1e8aa9877b3d1ae3142dd124",
+  "source_file_count": 141,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
   "python_version": "3.8.7",
@@ -134,6 +134,33 @@
     "native_preflight_comparisons": 5,
     "native_report_comparisons": 25
   },
+  "observations": {
+    "status": "passed",
+    "supported_states": 5,
+    "rejected_operations": 20,
+    "checks": [
+      "complete ordered target replacement preserves study text and other visits",
+      "state-dependent values and Unicode/multiline reasons retain native semantics",
+      "omitted targets are made explicit without inferring measurements",
+      "strict fields, precision and reasons use core validation; stale previews and changed forms cannot apply"
+    ],
+    "native_preflight_comparisons": 4,
+    "native_report_comparisons": 20
+  },
+  "release_candidate": {
+    "status": "passed",
+    "archives": 3,
+    "browser_runtime_files": 20,
+    "rejected_candidates": 11,
+    "rejected_candidate_ids": 9,
+    "checks": [
+      "source archive fingerprint and commit",
+      "module/source bytes and identity",
+      "complete browser runtime and local imports",
+      "all artifact lengths, hashes and checksum entries",
+      "recorded four-backend consumer completion"
+    ]
+  },
   "example_collection": {
     "status": "passed",
     "scope": "synthetic target-lesion software examples; not clinical validation",
@@ -203,6 +230,12 @@
       "js": "passed",
       "native": "passed"
     },
+    "checks": [
+      "typed root-facade construction",
+      "text template/parsing/preflight/replay",
+      "invalid input and valid NE remain separate",
+      "bilingual native bundles and tamper rejection"
+    ],
     "commands": [
       {
         "command": "moon run --target wasm .",
@@ -263,9 +296,13 @@
     "whole-visit append and management: blank measurements, complete targets, native validation and untouched observation content",
     "visit operation preview: explicit apply, duplicate/date rejection and stale or replaced preview protection",
     "input edit history: coalescing, exact raw restoration, bounded retention, branching and external-load reset",
+    "per-target observations: complete target forms, five states, precise values and reasons match native preflight/reports",
+    "observation apply: unchanged surrounding visits, explicit changes, strict schema and stale-preview rejection",
     "four hand-calculated importable examples, 20 browser/native formats, revision and batch",
     "package archive and synchronized tested README",
-    "independent extracted-candidate consumer on four backends"
+    "independent extracted-candidate consumer on four backends",
+    "release candidate contracts: strict rc IDs, source/module/browser identity, runtime closure and exact checksum sets",
+    "candidate corruption rejection: altered/missing artifacts, recomputed cross-file mismatches, paths and incomplete consumer evidence"
   ],
   "scenario_summaries": {
     "nadir-boundary": {
@@ -321,7 +358,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 262,
+  "command_count": 286,
   "commands": [
     {
       "command": "moon version --all",
@@ -1300,6 +1337,126 @@
     },
     {
       "command": "moon run --target native cmd/demo -- --verify-bundle <temporary>/export-3 --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format json --output <temporary>/report.json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format csv --output <temporary>/report.csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format html --output <temporary>/report.html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format markdown --output <temporary>/report.markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format svg --output <temporary>/report.svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format json --output <temporary>/report.json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format csv --output <temporary>/report.csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format html --output <temporary>/report.html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format markdown --output <temporary>/report.markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format svg --output <temporary>/report.svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format json --output <temporary>/report.json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format csv --output <temporary>/report.csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format html --output <temporary>/report.html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format markdown --output <temporary>/report.markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format svg --output <temporary>/report.svg",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --check-input --format json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format json --output <temporary>/report.json",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format csv --output <temporary>/report.csv",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format html --output <temporary>/report.html",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format markdown --output <temporary>/report.markdown",
+      "cwd": ".",
+      "exit_code": 0
+    },
+    {
+      "command": "moon run --target native cmd/demo -- --study <temporary>/study.json --input <temporary>/followup.csv --lang zh-CN --format svg --output <temporary>/report.svg",
       "cwd": ".",
       "exit_code": 0
     },
