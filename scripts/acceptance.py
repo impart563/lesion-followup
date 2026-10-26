@@ -471,6 +471,10 @@ def main():
     handoff = verify_handoff(cli, environment, passed)
     visit_editing = verify_visit_editing(cli, environment, passed)
     observations = verify_observations(cli, environment, passed)
+    navigation_run = subprocess.run([shutil.which("node", path=environment["PATH"]), "scripts/record_navigation_test.mjs", "_build/browser"],
+                                    cwd=str(ROOT), env=environment, capture_output=True, text=True, encoding="utf-8", check=True, timeout=60)
+    record_navigation = json.loads(navigation_run.stdout)
+    passed("observation search, hint navigation and unchanged inputs/reports")
     with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
         collection = Path(directory) / "复核 示例"
         examples = reproduce(collection, cli)
@@ -482,7 +486,7 @@ def main():
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
-    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "observation-editor.mjs", "workbench.css")), "browser workbench sources missing from module archive")
+    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "observation-editor.mjs", "record-navigation.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require(not any(entry.lower().endswith((".zip", ".bundle", ".pyc")) or "__pycache__" in entry.split("/") for entry in entries), "local archives or Python caches leaked into module")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
@@ -514,6 +518,7 @@ def main():
         "handoff": handoff,
         "visit_editing": visit_editing,
         "observations": observations,
+        "record_navigation": record_navigation,
         "release_candidate": release_candidate,
         "publish_filter": publish_filter,
         "example_collection": examples,

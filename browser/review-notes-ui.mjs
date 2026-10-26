@@ -2,7 +2,7 @@ import { createReviewNotes, updateReviewNotes, encodeReviewNotes, readReviewNote
   reviewProgress, REVIEW_KEY, REVIEW_LIMITS } from "./review-notes.mjs";
 import { escapeHtml as esc } from "./workbench.mjs";
 
-export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLanguage, getBusy, noticeText, download, notify, onChange = () => {} }) {
+export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLanguage, getBusy, noticeText, download, notify, openObservation = null, onChange = () => {} }) {
   const $ = id => document.getElementById(id);
   const signature = () => { const s = getSources(); return JSON.stringify([s.study_json, s.followup_csv]); };
   let record = null, binding = null, current = signature(), epoch = 0, busy = false, saved = false, lastError = "";
@@ -20,6 +20,7 @@ export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLangu
     $("review-summary-note").readOnly = !matching || locked;
     document.querySelectorAll("#review-notes-items textarea").forEach(el => { el.readOnly = !matching || locked; });
     document.querySelectorAll("#review-notes-items input[type=checkbox]").forEach(el => { el.disabled = !matching || locked; });
+    document.querySelectorAll("#review-notes-items [data-open-observation]").forEach(el => { el.disabled = !matching || locked || !getQuality()?.valid; });
     let hasLocal = false;
     try { hasLocal = !!localStorage.getItem(REVIEW_KEY); } catch { /* Explicit save/restore reports storage failures. */ }
     $("restore-review-notes").disabled = !ready || !hasLocal || locked;
@@ -49,7 +50,7 @@ export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLangu
     const items = record.items.filter(item => filter === "all" || item.status === filter);
     $("review-notes-empty").hidden = !!items.length;
     $("review-notes-empty").textContent = record.items.length ? "当前筛选下没有提示。" : "本次没有需要单独记录的自动提示，可在上方填写本轮复核说明。";
-    $("review-notes-items").innerHTML = items.map(item => `<article class="review-note-card"><div class="review-note-heading"><div><strong>${esc(item.hint.visit_id || "整份记录")}${item.hint.lesion_id ? " · " + esc(item.hint.lesion_id) : ""}</strong><span>${esc(item.hint.code)}</span></div><label class="review-viewed"><input type="checkbox" data-review-id="${item.id}" ${item.status === "reviewed" ? "checked" : ""}>已查看</label></div><p>${esc(noticeText(item.hint))}</p><details class="review-original"><summary>原始提示与位置</summary><p>${esc(item.hint.message)}</p><p>${esc([item.hint.source, item.hint.field, item.hint.line ? "第 " + item.hint.line + " 行" : "", item.hint.column ? "第 " + item.hint.column + " 列" : ""].filter(Boolean).join(" · "))}</p></details><label class="review-note-label">核查备注<textarea data-note-id="${item.id}" aria-label="${esc(item.id)} 核查备注" maxlength="${REVIEW_LIMITS.note}" rows="3" placeholder="记录已核对的信息，或仍需进一步确认的内容。">${esc(item.note)}</textarea></label></article>`).join("");
+    $("review-notes-items").innerHTML = items.map(item => `<article class="review-note-card"><div class="review-note-heading"><div><strong>${esc(item.hint.visit_id || "整份记录")}${item.hint.lesion_id ? " · " + esc(item.hint.lesion_id) : ""}</strong><span>${esc(item.hint.code)}</span></div><label class="review-viewed"><input type="checkbox" data-review-id="${item.id}" ${item.status === "reviewed" ? "checked" : ""}>已查看</label></div><p>${esc(noticeText(item.hint))}</p><details class="review-original"><summary>原始提示与位置</summary><p>${esc(item.hint.message)}</p><p>${esc([item.hint.source, item.hint.field, item.hint.line ? "第 " + item.hint.line + " 行" : "", item.hint.column ? "第 " + item.hint.column + " 列" : ""].filter(Boolean).join(" · "))}</p></details><label class="review-note-label">核查备注<textarea data-note-id="${item.id}" aria-label="${esc(item.id)} 核查备注" maxlength="${REVIEW_LIMITS.note}" rows="3" placeholder="记录已核对的信息，或仍需进一步确认的内容。">${esc(item.note)}</textarea></label>${openObservation && item.hint.visit_id ? `<button type="button" class="quiet review-observation-link" data-open-observation="${item.id}">录入本次观察 →</button>` : ""}</article>`).join("");
     refresh();
   }
 
@@ -67,6 +68,12 @@ export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLangu
     const id = event.target.dataset.reviewId;
     const item = record?.items.find(item => item.id === id);
     if (item) { edit({ id, status: event.target.checked ? "reviewed" : "pending", note: item.note }); render(); }
+  });
+  $("review-notes-items").addEventListener("click", event => {
+    const button = event.target.closest?.("[data-open-observation]");
+    if (!button || !active() || busy || getBusy() || !getQuality()?.valid) return;
+    const item = record.items.find(item => item.id === button.dataset.openObservation);
+    if (item) openObservation?.(item.hint);
   });
   $("review-notes-filter").addEventListener("change", render);
   $("review-notes-file").addEventListener("change", () => { epoch++; refresh(); });

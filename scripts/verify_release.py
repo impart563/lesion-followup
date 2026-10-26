@@ -10,7 +10,7 @@ from zipfile import ZipFile
 
 BROWSER_FILES = ('index.html', 'smoke.html', 'browser.js', 'browser.d.ts', 'app.mjs', 'workbench.mjs',
     'delivery.mjs', 'archive.mjs', 'review-notes.mjs', 'review-notes-ui.mjs', 'handoff.mjs', 'handoff-ui.mjs',
-    'edit-history.mjs', 'visit-editor.mjs', 'visit-editor-ui.mjs', 'observation-editor.mjs', 'examples.mjs',
+    'edit-history.mjs', 'visit-editor.mjs', 'visit-editor-ui.mjs', 'observation-editor.mjs', 'record-navigation.mjs', 'examples.mjs',
     'workbench.css', 'package.json', 'serve_browser.py')
 
 def candidate_id(value):

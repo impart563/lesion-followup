@@ -64,7 +64,7 @@ export function mountVisitEditor({ getEvaluate, getSources, getModel, getQuality
     planner.invalidate(); $("visit-edit-preview").hidden = true;
     if ($("visit-dialog").open) $("visit-edit-status").textContent = "当前记录已更新，请关闭窗口后重新选择随访。";
   }
-  function open(kind, selectedId = null) {
+  function open(kind, selectedId = null, targetId = null) {
     if (!getQuality()?.valid || !getModel() || getBusy()) return;
     const visits = visitSummaries(getModel());
     $("visit-existing").innerHTML = visits.map(visit => `<option value="${esc(visit.id)}">${esc(visit.id)} · ${esc(visit.date)} · ${visit.observations} 条观察</option>`).join("");
@@ -74,7 +74,11 @@ export function mountVisitEditor({ getEvaluate, getSources, getModel, getQuality
       $("visit-id").value = ""; $("visit-date").value = ""; $("visit-technique").value = getModel().study.technique_id;
     } else fillExisting();
     $("visit-dialog").showModal();
-    if (kind === "observations") $("visit-existing").focus(); else $(kind === "append" ? "visit-id" : "visit-date").focus();
+    if (kind === "observations") {
+      const card = [...$("visit-observations").querySelectorAll("[data-target-id]")].find(card => card.dataset.targetId === targetId);
+      const state = card?.querySelector("[data-observation-state]").value;
+      (card?.querySelector(state === "measured" ? "[data-observation-diameter]" : state === "not_evaluable" ? "[data-observation-reason]" : "[data-observation-state]") || $("visit-existing")).focus();
+    } else $(kind === "append" ? "visit-id" : "visit-date").focus();
   }
   $("close-visit-dialog").addEventListener("click", () => $("visit-dialog").close());
   $("visit-dialog").addEventListener("close", () => invalidate());

@@ -1,7 +1,7 @@
 # 0.2.0 发布准备与接入
 
 0.2.0 汇总输入准备、复核追溯、离线工作区、人工核查、完整交接及观察录入。本仓库当前准备
-`0.2.0-rc.2` 发布候选。模块内版本仍为 `0.2.0`，候选标识写入归档名称和发布清单。
+`0.2.0-rc.3` 发布候选。模块内版本仍为 `0.2.0`，候选标识写入归档名称和发布清单。
 早期 `rc.1` 保持其原始提交和附件；它不代表当前开发内容，不能直接替代新候选。
 
 ## 兼容范围
@@ -41,19 +41,19 @@ python scripts/serve_browser.py --directory . --port 8765
 ```sh
 python scripts/acceptance.py --record docs/acceptance-results.json
 # Review and commit the accepted tree before the next command.
-python scripts/build_release.py --candidate rc.2 --output _build/release-0.2.0-rc.2
-python scripts/verify_release.py _build/release-0.2.0-rc.2
+python scripts/build_release.py --candidate rc.3 --output _build/release-0.2.0-rc.3
+python scripts/verify_release.py _build/release-0.2.0-rc.3
 ```
 
 输出目录必须尚不存在。候选内容包括：
 
 - `impart563-lesion-followup-0.2.0.zip`：Mooncakes 候选模块，已经解压消费验证。
-- `lesion-followup-0.2.0-rc.2-source.zip`：对应 Git 提交的源码，可运行验收。
-- `lesion-followup-0.2.0-rc.2-browser.zip`：可由普通静态服务器提供的完整工作区，无需重新编译。
+- `lesion-followup-0.2.0-rc.3-source.zip`：对应 Git 提交的源码，可运行验收。
+- `lesion-followup-0.2.0-rc.3-browser.zip`：可由普通静态服务器提供的完整工作区，无需重新编译。
 - `release-manifest.json` 与 `SHA256SUMS`：提交、验收指纹、归档字节数与摘要，以及实际发布状态。
 - `verification.json`：生成后实际运行独立核验的结果，含各归档文件数、展开字节数、运行文件数及四后端消费状态。
 
-候选编号仅接受 `rc.N`（正整数，不带前导零），默认 `rc.2`。每次使用新的输出目录，避免覆盖
+候选编号仅接受 `rc.N`（正整数，不带前导零），默认 `rc.3`。每次使用新的输出目录，避免覆盖
 旧候选。核验工具不解压归档到磁盘，会检查文件路径、摘要、源码提交及指纹、模块与源码的一致性、
 浏览器运行文件和本地导入是否完整，以及记录中的消费验证是否齐备。它核对本地候选的一致性，
 不认证作者身份，也不查询 registry 的实际发布状态。重新打包不代表重新发布。
@@ -75,10 +75,12 @@ python scripts/verify_release.py _build/release-0.2.0-rc.2
 本项目适合作为早期 `0.2.0` 库版本发布到 Mooncakes，以便外部项目通过固定版本依赖和 API 文档接入。
 完整浏览器体验、CLI 文件流程及合成示例继续通过 GitHub 源码和浏览器归档交付。发布前仍需确认
 目标版本在命名空间中的可用性；若该版本已经存在，应按实际变更提升版本并重新验收，不能覆盖。
-本批准备候选与接入证据，不自动登录或执行正式上传。模块版本规则及发布方式参考
+构建脚本仅准备候选；正式发布由维护者执行 `moon whoami` 核对账号，再运行 `moon publish`。模块版本规则及发布方式参考
 [官方发布文档](https://docs.moonbitlang.com/en/stable/toolchain/moon/package-manage-tour.html#publish-your-module)。
 
 只有 registry 返回成功且能从新目录解析 `impart563/lesion-followup@0.2.0`，再执行独立模块的编译及运行后，才记录“已发布、可安装”及实际地址。未完成前，本地 workspace 消费与候选包验证均不能称作 registry 安装成功。
+
+发布后运行 `python scripts/verify_registry.py --record _build/registry-installation.json`，在仓库外的新目录禁用 workspace，查询精确版本并实际运行四后端消费示例。该命令只验证公开 registry，不上传模块；失败会退出且不写成功记录。
 
 全部演示输入为合成数据，仅供人工 CT 靶病灶的软件复核，不代表整体疗效、治疗建议或临床验证。
 

@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "_build/release")
-    parser.add_argument("--candidate", default="rc.2")
+    parser.add_argument("--candidate", default="rc.3")
     args = parser.parse_args()
     try:
         candidate_id(args.candidate)

@@ -6,6 +6,7 @@ import { mountReviewNotes } from "./review-notes-ui.mjs";
 import { mountHandoff } from "./handoff-ui.mjs";
 import { createEditHistory } from "./edit-history.mjs";
 import { mountVisitEditor } from "./visit-editor-ui.mjs";
+import { filterObservationRows, locateObservation } from "./record-navigation.mjs";
 
 const $ = id => document.getElementById(id);
 const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
@@ -177,8 +178,13 @@ function renderQuality() {
       description.className = "notice-description"; description.textContent = noticeText(n);
       const detail = document.createElement("details"), summary = document.createElement("summary"), original = document.createElement("p"); summary.textContent = "查看原始诊断"; original.textContent = `${n.code} · ${n.field || "—"}${n.column ? " · 列 " + n.column : ""}：${n.message}`; detail.append(summary, original);
       const focus = document.createElement("button"); focus.textContent = "前往对应记录 →"; focus.type = "button";
-      focus.addEventListener("click", () => { showView("records"); if ($("visit-filter")) { $("visit-filter").value = "all"; filterRows(); } const target = targetFor(n); if (target.closest("details")) target.closest("details").open = true; if (target.tagName === "TEXTAREA" && ["study-source", "csv-source"].includes(target.id)) $("source-details").open = true; target.focus(); });
-      li.append(heading, description, detail, focus); parent.append(li);
+      focus.addEventListener("click", () => { showView("records"); clearRecordFilter(); const target = targetFor(n); if (target.closest("details")) target.closest("details").open = true; if (target.tagName === "TEXTAREA" && ["study-source", "csv-source"].includes(target.id)) $("source-details").open = true; target.focus(); });
+      li.append(heading, description, detail, focus);
+      if (!blocking && q.valid && locateObservation(state.model, n)) {
+        const edit = document.createElement("button"); edit.type = "button"; edit.textContent = "录入本次观察";
+        edit.disabled = state.busy; edit.addEventListener("click", () => openObservation(n)); li.append(edit);
+      }
+      parent.append(li);
       if (blocking) { const target = targetFor(n); target.classList.add("invalid"); target.setAttribute("aria-invalid", "true"); }
     }
   }
@@ -231,15 +237,19 @@ function renderTables() {
       <div class="table-scroll"><table class="target-table"><thead><tr><th>病灶编号</th><th>器官组</th><th>病灶类型</th><th>基线直径 mm</th><th></th></tr></thead><tbody>${targetRows}</tbody></table></div>
     </details>
     <section class="surface"><div class="surface-head visit-table-head"><div><h2>随访观察</h2><p>逐次核对测量值，保留未测量与无法评价的原始观察。</p></div><div class="visit-table-actions"><button id="new-visit" class="secondary">＋ 新增随访</button><button id="enter-observations" class="secondary">录入本次观察</button><button id="manage-visit" class="quiet">管理随访</button><label class="compact-label">随访<select id="visit-filter" aria-label="筛选随访"><option value="all">全部随访</option>${visits.map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("")}</select></label></div></div>
+      <div class="record-search"><label for="record-query">查找观察</label><input id="record-query" type="search" maxlength="160" placeholder="病灶、器官、日期、状态或说明" aria-describedby="record-filter-status"><button id="clear-record-filter" class="quiet" type="button">清除筛选</button></div>
       <div class="table-scroll"><table class="observation-table"><thead><tr>${inputNames.map(n => `<th>${n}</th>`).join("")}<th></th></tr></thead><tbody>${observationRows}</tbody></table></div>
-      <div class="table-foot"><button id="add-row" class="quiet">＋ 添加观察</button><p class="muted">${state.model.rows.length} 条观察 · 直径最多一位小数</p></div>
+      <div class="table-foot"><button id="add-row" class="quiet">＋ 添加观察</button><p id="record-filter-status" class="muted" role="status" aria-live="polite"></p></div>
     </section>`;
   $("visit-filter").addEventListener("change", filterRows);
+  $("record-query").addEventListener("input", filterRows);
+  $("clear-record-filter").addEventListener("click", () => { clearRecordFilter(); $("record-query").focus(); });
   host.querySelectorAll("[data-study-path]").forEach(el => el.addEventListener("input", () => {
     const match = el.dataset.studyPath.match(/^targets\[(\d+)\]\.(\w+)$/);
     if (match) study.targets[Number(match[1])][match[2]] = el.value;
     else study[el.dataset.studyPath] = el.value;
     changed(true, "study:" + el.dataset.studyPath, "编辑基线与靶病灶");
+    filterRows();
   }));
   host.querySelectorAll("[data-row][data-column]").forEach(el => el.addEventListener("input", () => {
     state.model.rows[Number(el.dataset.row)][Number(el.dataset.column)] = el.value;
@@ -248,6 +258,7 @@ function renderTables() {
       filterRows();
     }
     changed(true, `cell:${el.dataset.row}:${el.dataset.column}`, "编辑随访观察");
+    filterRows();
   }));
   const redraw = () => { const baselineOpen = $("baseline-details").open; changed(true); renderTables(); $("baseline-details").open = baselineOpen; renderQuality(); };
   host.querySelectorAll("[data-study-path], [data-row][data-column]").forEach(el => el.addEventListener("blur", () => history.settle()));
@@ -257,21 +268,45 @@ function renderTables() {
   $("add-row").addEventListener("click", () => { state.model.rows.push(["", "", study.technique_id, "", "missing", "", ""]); redraw(); });
   $("new-visit").addEventListener("click", () => visitController.open("append"));
   const openSelectedVisit = mode => {
-    const index = $("visit-filter").value;
-    const currentVisits = [...new Set(state.model.rows.map(row => row[0]))];
-    visitController.open(mode, index === "all" ? currentVisits.at(-1) : currentVisits[Number(index)]);
+    const rows = visibleObservationRows();
+    if (!rows.length) { message("当前筛选下没有观察，请清除筛选后选择随访。", true); return; }
+    visitController.open(mode, state.model.rows[rows.at(-1)][0]);
   };
   $("manage-visit").addEventListener("click", () => openSelectedVisit("update"));
   $("enter-observations").addEventListener("click", () => openSelectedVisit("observations"));
   visitController?.refresh();
+  filterRows();
+}
+
+function visibleObservationRows() {
+  const selected = $("visit-filter")?.value ?? "all";
+  if (!state.model) return [];
+  const visits = [...new Set(state.model.rows.map(row => row[0]))];
+  return filterObservationRows(state.model, { visit_id: selected === "all" ? null : visits[Number(selected)], query: $("record-query")?.value || "" });
 }
 
 function filterRows() {
-  const selected = $("visit-filter").value;
-  const visits = [...new Set(state.model.rows.map(row => row[0]))];
+  if (!$("record-query") || !state.model) return;
+  const visible = new Set(visibleObservationRows());
   document.querySelectorAll("[data-observation-row]").forEach(el => {
-    el.hidden = selected !== "all" && state.model.rows[Number(el.dataset.observationRow)][0] !== visits[Number(selected)];
+    el.hidden = !visible.has(Number(el.dataset.observationRow));
   });
+  $("record-filter-status").textContent = `显示 ${visible.size} / ${state.model.rows.length} 条观察` + (visible.size ? " · 筛选仅影响表格显示" : " · 没有匹配的观察，请调整条件或清除筛选");
+  $("clear-record-filter").disabled = !$("record-query").value && $("visit-filter").value === "all";
+}
+
+function clearRecordFilter() {
+  if (!$("record-query")) return;
+  $("record-query").value = ""; $("visit-filter").value = "all"; filterRows();
+}
+
+function openObservation(hint) {
+  const location = locateObservation(state.model, hint);
+  if (!location || !state.quality?.valid || state.busy) return;
+  showView("records"); clearRecordFilter();
+  const visits = [...new Set(state.model.rows.map(row => row[0]))];
+  $("visit-filter").value = String(visits.indexOf(location.visit_id)); filterRows();
+  visitController.open("observations", location.visit_id, location.lesion_id);
 }
 
 function applySources() {
@@ -580,7 +615,7 @@ bind("verify-archive", async () => {
 
 reviewNotesController = mountReviewNotes({ getEvaluate: () => state.evaluate, getSources: source,
   getQuality: () => state.quality, getLanguage: () => $("language").value, getBusy: () => state.busy,
-  noticeText, download, notify: message, onChange: () => { handoffController?.refresh(); visitController?.refresh(); } });
+  noticeText, download, notify: message, openObservation, onChange: () => { handoffController?.refresh(); visitController?.refresh(); } });
 
 handoffController = mountHandoff({ getEvaluate: () => state.evaluate,
   getSession: () => ({ before: state.baseline, current: source(), language: $("language").value }),

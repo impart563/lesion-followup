@@ -1,12 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-26
+
+- Add combined visit/text observation filters with visible counts and clear action;
+  filtering preserves source inputs, review bindings and full report contents.
+- Link current quality and human-review hints to the matching visit and target
+  form, including omitted observations; stale review notes cannot navigate.
+- Add independent exact-version registry installation verification across four backends.
 
 - Add complete per-target observation entry with baseline context, state-specific
   fields, core validation, before/after preview and one-step input-history restore.
 - Extend the independent consumer to text parsing/preflight, valid NE handling,
   bilingual bundles and tamper rejection on all four supported backends.
-- Refresh candidate preparation to rc.2 with version-2 source-count manifests
+- Refresh candidate preparation to rc.3 with version-2 source-count manifests
   and a standalone verifier for source/module/browser consistency and checksums.
 
 - Add whole-visit creation with one blank missing observation per baseline

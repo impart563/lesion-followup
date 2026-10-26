@@ -49,4 +49,4 @@ def verify_candidate_consumer(package, moon, environment):
         return {"source": "extracted Mooncakes candidate; no checkout library link", "backends": outputs,
                 "checks": ["typed root-facade construction", "text template/parsing/preflight/replay", "invalid input and valid NE remain separate", "bilingual native bundles and tamper rejection"],
                 "commands": commands,
-                "registry_install": "not performed; candidate is unpublished"}
+                "registry_install": "not performed by this check; extracted candidate only"}
