@@ -356,6 +356,13 @@ the Mooncakes source package. [Acceptance details](docs/acceptance.md) and the
 [recorded local result](docs/acceptance-results.json) identify verified commands
 and the source fingerprint. The same script is configured in CI.
 
+## Codex 辅助使用声明
+
+本项目使用 Codex 辅助文献查阅与资料整理、代码编写与纠错、测试用例补充和文档润色。
+
+Codex assists with literature review and reference organization, code writing
+and debugging, test case development, and documentation refinement.
+
 ## License
 
 Apache-2.0 for this project's code and original documentation. The RECIST name,
