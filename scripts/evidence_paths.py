@@ -1,5 +1,7 @@
 """Portable paths for shareable software acceptance records."""
 from pathlib import Path
+import os
+import re
 import tempfile
 
 
@@ -20,18 +22,24 @@ def record_argument(value, checkout, temporary=None):
 
 def public_record(value, checkout, aliases=()):
     """Remove machine-specific prefixes from nested metadata and captured output."""
-    roots = [(Path(checkout).resolve(), '<checkout>'),
-             (Path(tempfile.gettempdir()).resolve(), '<temporary>'),
-             (Path.home().resolve(), '<home>')]
-    roots.extend((Path(path).resolve(), label) for path, label in aliases)
+    roots = [(Path(checkout), '<checkout>'),
+             (Path(tempfile.gettempdir()), '<temporary>'),
+             (Path.home(), '<home>')]
+    roots.extend((Path(path), label) for path, label in aliases)
     replacements = {}
-    for path, label in sorted(roots, key=lambda item: len(str(item[0])), reverse=True):
-        for prefix in (str(path), path.as_posix()):
-            replacements.setdefault(prefix, label)
+    for path, label in roots:
+        # Windows tools can print either an 8.3 spelling or its expanded path.
+        for variant in (path, path.resolve()):
+            for prefix in (str(variant), variant.as_posix()):
+                replacements.setdefault(prefix, label)
+    prefixes = sorted(replacements, key=len, reverse=True)
     def clean(item):
         if isinstance(item, str):
-            for prefix, label in replacements.items():
-                item = item.replace(prefix, label)
+            for prefix in prefixes:
+                if os.name == 'nt':
+                    item = re.sub(re.escape(prefix), lambda _: replacements[prefix], item, flags=re.I)
+                else:
+                    item = item.replace(prefix, replacements[prefix])
             return item
         if isinstance(item, dict):
             return {key: clean(content) for key, content in item.items()}
@@ -51,11 +59,13 @@ def verify_record_paths():
         assert record_argument('examples/study.json', checkout) == 'examples/study.json'
         assert record_argument('--format', checkout) == '--format'
         raw = {'commands': [{'command': str(source), 'exit_code': 0}],
+               'canonical': str(source.resolve()),
                'tree': 'consumer (local ' + str(base / 'consumer') + ')',
                'toolchain': Path.home().as_posix() + '/tools/moon',
                'url': 'https://mooncakes.io/docs/impart563/lesion-followup@0.2.0'}
         clean = public_record(raw, checkout, aliases=[(base / 'consumer', '<registry-consumer>')])
         assert clean['commands'][0]['command'].startswith('<checkout>')
+        assert clean['canonical'].startswith('<checkout>')
         assert clean['commands'][0]['exit_code'] == 0
         assert clean['tree'] == 'consumer (local <registry-consumer>)'
         assert clean['toolchain'] == '<home>/tools/moon'
