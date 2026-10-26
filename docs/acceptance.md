@@ -279,3 +279,37 @@ were identical, and both extracted report directories passed native verification
 The existing desktop layout was visually reviewed. No mobile viewport or native
 print-dialog check is claimed for this batch. CI covers transport and workflow
 contracts with synthetic data; these checks are not clinical validation.
+
+## Visit editing and input-history acceptance
+
+The unified suite runs `visit_editing_acceptance.py`. One-to-five-target
+creation produces exactly one blank `missing` row per baseline target without
+copying prior measurements. Whole-visit updates retain every observation field
+and Unicode/multiline CRLF reason; removal retains unaffected rows. Five
+independent native preflights and 25 native report files match the browser
+results, including removal of all visits and subsequent creation. Seventeen
+invalid operations cover strict fields, duplicates, nonexistent visits,
+invalid dates/order and malformed current input. Planner checks verify preview
+isolation, explicit apply, failure withdrawal and revision invalidation.
+
+History tests cover continuous-field grouping, exact original raw-text
+restoration, independent snapshots, redo branching, reset, 40-step retention
+and the UTF-8 byte budget. Clinical categories and expected rules are unchanged.
+
+On 2026-10-26 the Windows in-app browser exercised duplicate-ID and date-order
+rejection, preview without input replacement, form-edit withdrawal, explicit
+creation, shared metadata updates, whole-visit removal and undo. Newly added
+targets had empty measurements. Invalid precision blocked reports; undo restored
+the prior valid input exactly. Continuous typing formed one undo step and a
+new edit cleared redo. Editing retracted the old report and undo did not revive
+it. Loading an external session reset history and preserved the older local
+human-review copy. Input changes made those notes read-only; exact undo restored
+their binding and export controls. Direct row-level renaming was also checked
+against the manager's current visit selection.
+
+Actual study JSON, CSV and audit JSON downloads were independently checked with
+Python. The study text and original eight observations stayed identical; the
+two added observations retained `missing` and empty diameters. The five-visit
+audit JSON matched a fresh native CLI output byte for byte. The existing desktop
+viewport and visit dialog were reviewed visually. No mobile or native printing
+check is claimed. These are software checks using synthetic inputs.

@@ -4,13 +4,16 @@ import { createBundle, reviewBatch, batchZip, verifyArchive } from "./delivery.m
 import { writeZip, ZIP_LIMITS } from "./archive.mjs";
 import { mountReviewNotes } from "./review-notes-ui.mjs";
 import { mountHandoff } from "./handoff-ui.mjs";
+import { createEditHistory } from "./edit-history.mjs";
+import { mountVisitEditor } from "./visit-editor-ui.mjs";
 
 const $ = id => document.getElementById(id);
 const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
 const inputNames = ["随访编号", "日期", "采集标识", "病灶编号", "观察状态", "直径 mm", "读片者说明"];
 const stateNames = { measured: "已测量", absent: "已消失", too_small: "过小，无法可靠测量", missing: "未测量", not_evaluable: "无法评价" };
 const urls = [];
-let reviewNotesController = null, handoffController = null;
+let reviewNotesController = null, handoffController = null, visitController = null;
+const history = createEditHistory(state.sources);
 let batchResult = null, batchToken = 0, batchRunning = false, archiveToken = 0, archiveRunning = false;
 const printShadow = $("print-render").attachShadow({ mode: "open" });
 printShadow.addEventListener("click", event => {
@@ -118,6 +121,13 @@ function updateButtons() {
   updateBaseline();
   updateContext();
   reviewNotesController?.refresh();
+  visitController?.refresh();
+  const edits = history.status();
+  $("undo-edit").disabled = !ready || state.busy || !edits.undo;
+  $("redo-edit").disabled = !ready || state.busy || !edits.redo;
+  $("undo-edit").title = edits.undoLabel ? "撤销：" + edits.undoLabel : "暂无可撤销的修改";
+  $("redo-edit").title = edits.redoLabel ? "重做：" + edits.redoLabel : "暂无可重做的修改";
+  $("edit-history-status").textContent = (edits.undo || edits.redo ? `可撤销 ${edits.undo} 步 · 可重做 ${edits.redo} 步` : "编辑历史仅保留在当前页面。") + (edits.limited ? " · 较早的历史已释放" : "");
 }
 
 function discardReport() {
@@ -182,10 +192,11 @@ function validate() {
   renderQuality();
 }
 
-function changed(fromTable = false) {
+function changed(fromTable = false, group = null, label = "编辑测量记录") {
   state.revision++;
   discardReport();
   if (fromTable) writeSources(serializeTable(state.model));
+  history.record(source(), label, group);
   draftStatus();
   validate();
 }
@@ -219,7 +230,7 @@ function renderTables() {
       <div class="surface-head"><div><h3>基线靶病灶</h3><p>非淋巴结记录最长径，淋巴结记录短轴。</p></div><button id="add-target" class="quiet">＋ 添加病灶</button></div>
       <div class="table-scroll"><table class="target-table"><thead><tr><th>病灶编号</th><th>器官组</th><th>病灶类型</th><th>基线直径 mm</th><th></th></tr></thead><tbody>${targetRows}</tbody></table></div>
     </details>
-    <section class="surface"><div class="surface-head"><div><h2>随访观察</h2><p>逐次核对测量值，保留未测量与无法评价的原始观察。</p></div><label class="compact-label">随访<select id="visit-filter" aria-label="筛选随访"><option value="all">全部随访</option>${visits.map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("")}</select></label></div>
+    <section class="surface"><div class="surface-head visit-table-head"><div><h2>随访观察</h2><p>逐次核对测量值，保留未测量与无法评价的原始观察。</p></div><div class="visit-table-actions"><button id="new-visit" class="secondary">＋ 新增随访</button><button id="manage-visit" class="quiet">管理随访</button><label class="compact-label">随访<select id="visit-filter" aria-label="筛选随访"><option value="all">全部随访</option>${visits.map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("")}</select></label></div></div>
       <div class="table-scroll"><table class="observation-table"><thead><tr>${inputNames.map(n => `<th>${n}</th>`).join("")}<th></th></tr></thead><tbody>${observationRows}</tbody></table></div>
       <div class="table-foot"><button id="add-row" class="quiet">＋ 添加观察</button><p class="muted">${state.model.rows.length} 条观察 · 直径最多一位小数</p></div>
     </section>`;
@@ -228,7 +239,7 @@ function renderTables() {
     const match = el.dataset.studyPath.match(/^targets\[(\d+)\]\.(\w+)$/);
     if (match) study.targets[Number(match[1])][match[2]] = el.value;
     else study[el.dataset.studyPath] = el.value;
-    changed(true);
+    changed(true, "study:" + el.dataset.studyPath, "编辑基线与靶病灶");
   }));
   host.querySelectorAll("[data-row][data-column]").forEach(el => el.addEventListener("input", () => {
     state.model.rows[Number(el.dataset.row)][Number(el.dataset.column)] = el.value;
@@ -236,13 +247,21 @@ function renderTables() {
       $("visit-filter").innerHTML = '<option value="all">全部随访</option>' + [...new Set(state.model.rows.map(row => row[0]))].map((v, i) => `<option value="${i}">${esc(v || "未填写编号")}</option>`).join("");
       filterRows();
     }
-    changed(true);
+    changed(true, `cell:${el.dataset.row}:${el.dataset.column}`, "编辑随访观察");
   }));
   const redraw = () => { const baselineOpen = $("baseline-details").open; changed(true); renderTables(); $("baseline-details").open = baselineOpen; renderQuality(); };
+  host.querySelectorAll("[data-study-path], [data-row][data-column]").forEach(el => el.addEventListener("blur", () => history.settle()));
   host.querySelectorAll("[data-remove-target]").forEach(el => el.addEventListener("click", () => { study.targets.splice(Number(el.dataset.removeTarget), 1); redraw(); }));
   host.querySelectorAll("[data-remove-row]").forEach(el => el.addEventListener("click", () => { state.model.rows.splice(Number(el.dataset.removeRow), 1); redraw(); }));
   $("add-target").addEventListener("click", () => { study.targets.push({ id: "", organ: "", kind: "non_nodal", baseline_mm: "" }); redraw(); });
   $("add-row").addEventListener("click", () => { state.model.rows.push(["", "", study.technique_id, "", "missing", "", ""]); redraw(); });
+  $("new-visit").addEventListener("click", () => visitController.open("append"));
+  $("manage-visit").addEventListener("click", () => {
+    const index = $("visit-filter").value;
+    const currentVisits = [...new Set(state.model.rows.map(row => row[0]))];
+    visitController.open("update", index === "all" ? currentVisits.at(-1) : currentVisits[Number(index)]);
+  });
+  visitController?.refresh();
 }
 
 function filterRows() {
@@ -266,6 +285,7 @@ function applySources() {
 function replaceSources(sources, before = null) {
   state.baseline = before ? Object.freeze({ study_json: before.study_json, followup_csv: before.followup_csv }) : null;
   writeSources(sources);
+  history.reset(sources);
   applySources();
 }
 
@@ -317,7 +337,15 @@ bind("apply-source", applySources);
 bind("check-input", () => { validate(); message(state.quality.valid ? "记录检查完成，人工核查项已列在下方。" : "有记录需要调整，请查看下方提示。", !state.quality.valid); });
 for (const id of ["study-source", "csv-source"]) $(id).addEventListener("input", () => {
   state.sources[id === "study-source" ? "study_json" : "followup_csv"] = $(id).value;
-  state.model = null; renderTables(); changed();
+  state.model = null; renderTables(); changed(false, id, "编辑原始文件");
+});
+for (const id of ["study-source", "csv-source"]) $(id).addEventListener("blur", () => history.settle());
+for (const [id, action] of [["undo-edit", "undo"], ["redo-edit", "redo"]]) bind(id, () => {
+  if (state.busy) return;
+  const restored = history[action]();
+  if (!restored) return;
+  writeSources(restored); applySources(); showView("records");
+  message(action === "undo" ? "已撤销上一步修改，请按当前记录重新生成报告。" : "已重做修改，请按当前记录重新生成报告。");
 });
 $("language").addEventListener("change", () => changed());
 bind("save-draft", () => { const text = makeDraft(source(), $("language").value); localStorage.setItem(DRAFT_KEY, text); state.saved = signature(); localDraftStatus(); draftStatus(); message("草稿已保存，下次打开可从“草稿”中恢复。"); });
@@ -550,7 +578,7 @@ bind("verify-archive", async () => {
 
 reviewNotesController = mountReviewNotes({ getEvaluate: () => state.evaluate, getSources: source,
   getQuality: () => state.quality, getLanguage: () => $("language").value, getBusy: () => state.busy,
-  noticeText, download, notify: message, onChange: () => handoffController?.refresh() });
+  noticeText, download, notify: message, onChange: () => { handoffController?.refresh(); visitController?.refresh(); } });
 
 handoffController = mountHandoff({ getEvaluate: () => state.evaluate,
   getSession: () => ({ before: state.baseline, current: source(), language: $("language").value }),
@@ -563,6 +591,22 @@ handoffController = mountHandoff({ getEvaluate: () => state.evaluate,
     reviewNotesController.adopt(notes);
     $("input-status").textContent = "来自已核查的完整交接包。";
     showView(notes ? "notes" : "records");
+  },
+});
+
+visitController = mountVisitEditor({ getEvaluate: () => state.evaluate, getSources: source,
+  getModel: () => state.model, getQuality: () => state.quality,
+  getRevision: () => JSON.stringify([state.revision, reviewNotesController.version()]), getBusy: () => state.busy,
+  noticeText, notify: message,
+  apply: ({ sources, summary }) => {
+    const labels = { append: "新增随访", update: "修改随访信息", remove: "移除整次随访" };
+    history.record(sources, labels[summary.kind]);
+    writeSources(sources); applySources(); showView("records");
+    if (summary.kind !== "remove") {
+      const visits = [...new Set(state.model.rows.map(row => row[0]))];
+      $("visit-filter").value = String(visits.indexOf(summary.id)); filterRows();
+    }
+    message(summary.kind === "append" ? "随访已新增，各靶病灶保留为未测量，请补充本次观察。" : summary.kind === "remove" ? "本次随访已移除，可通过“撤销修改”恢复。" : "本次随访信息已同步更新，测量值与说明已保留。");
   },
 });
 

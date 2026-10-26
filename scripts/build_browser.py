@@ -18,7 +18,7 @@ def package_browser():
     if source_map.exists():
         shutil.copyfile(str(source_map), str(output / "browser.js.map"))
     shutil.copyfile(str(ROOT / "browser" / "browser.d.ts"), str(output / "browser.d.ts"))
-    for name in ("index.html", "smoke.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "workbench.css"):
+    for name in ("index.html", "smoke.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "workbench.css"):
         shutil.copyfile(str(ROOT / "browser" / name), str(output / name))
     shutil.copyfile(str(ROOT / "scripts/serve_browser.py"), str(output / "serve_browser.py"))
     cases = ROOT / "examples/review-cases"

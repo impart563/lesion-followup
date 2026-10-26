@@ -57,6 +57,10 @@ checklist retains viewing states and comments, with input-bound note files and
 independent HTML/Markdown explanations; core findings and categories stay intact.
 Complete handoff ZIPs carry both input versions, native reports and optional
 notes, with full report regeneration before explicit workspace restoration.
+Whole-visit editing adds blank observations for every baseline target, updates
+shared visit information and removes visits after preview. Current-input undo
+and redo retain exact text within a bounded in-memory history; see the
+[editing contract](docs/input-editing.md).
 
 ### Prepare and check inputs
 

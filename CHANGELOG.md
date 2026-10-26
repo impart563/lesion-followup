@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add whole-visit creation with one blank missing observation per baseline
+  target, and previewed metadata updates/removal validated by the MoonBit core.
+- Add current-input undo/redo with focused-field grouping, bounded in-memory
+  retention, exact raw-text restoration and resets when loading another case.
+
 - Add complete review handoff ZIPs containing portable source sessions,
   native-compatible current reports and optional input-bound human notes.
 - Add strict outer/nested integrity checks and regeneration of every report

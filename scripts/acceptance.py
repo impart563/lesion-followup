@@ -26,6 +26,7 @@ from revision_acceptance import verify_revisions
 from delivery_acceptance import verify_delivery
 from review_notes_acceptance import verify_review_notes
 from handoff_acceptance import verify_handoff
+from visit_editing_acceptance import verify_visit_editing
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -466,6 +467,7 @@ def main():
     delivery = verify_delivery(cli, environment, passed)
     review_notes = verify_review_notes(cli, environment, passed)
     handoff = verify_handoff(cli, environment, passed)
+    visit_editing = verify_visit_editing(cli, environment, passed)
     with tempfile.TemporaryDirectory(prefix="lesion-examples ") as directory:
         collection = Path(directory) / "复核 示例"
         examples = reproduce(collection, cli)
@@ -477,7 +479,7 @@ def main():
     with ZipFile(package_path) as archive:
         entries = [entry.replace("\\", "/") for entry in archive.namelist()]
     require("moon.mod" in entries and "LICENSE" in entries, "module archive is incomplete")
-    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "workbench.css")), "browser workbench sources missing from module archive")
+    require(all("browser/" + name in entries for name in ("index.html", "app.mjs", "workbench.mjs", "delivery.mjs", "archive.mjs", "review-notes.mjs", "review-notes-ui.mjs", "handoff.mjs", "handoff-ui.mjs", "edit-history.mjs", "visit-editor.mjs", "visit-editor-ui.mjs", "workbench.css")), "browser workbench sources missing from module archive")
     require(not any(entry.startswith((".mooncakes/", "_build/", "examples/downstream-consumer/")) for entry in entries), "local/cache files leaked into package")
     require((ROOT / "README.md").read_bytes() == (ROOT / "README.mbt.md").read_bytes(), "README copies differ")
     passed("package archive and synchronized tested README")
@@ -503,6 +505,7 @@ def main():
         "browser_delivery": delivery,
         "review_notes": review_notes,
         "handoff": handoff,
+        "visit_editing": visit_editing,
         "example_collection": examples,
         "candidate_consumer": candidate_consumer,
         "workflow_checks": checks,
