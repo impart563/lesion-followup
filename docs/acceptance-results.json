@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "checked_at_utc": "2026-10-26T03:38:08.979856+00:00",
+  "checked_at_utc": "2026-10-26T03:42:00.599481+00:00",
   "module": "impart563/lesion-followup@0.2.0",
   "platform": {
     "system": "Windows",
@@ -12,7 +12,7 @@
     "RUNNER_OS": null
   },
   "scope": "software acceptance using synthetic data; not clinical validation",
-  "source_sha256": "06a02957f54dd9f725827ddbd5d429d70c68ae1b1e8aa9877b3d1ae3142dd124",
+  "source_sha256": "24d31f9de1a36e7e719d2267c12c94e514704cd4c426a9c1d03cbcfacccdc74d",
   "source_file_count": 141,
   "reproduce": "python scripts/acceptance.py --record docs/acceptance-results.json",
   "toolchain": "moon 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moon.EXE\nmoonc v0.10.14+7d59c7ec9 (2026-09-18) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonc.exe\nmoonrun 0.1.20260920 (914d7da 2026-09-20) ~\\.moon-0.10.9-final-c340122c7b1446ca853a17cddc5d9ef3\\bin\\moonrun.exe\n\nFeature flags enabled: rr_moon_mod,rr_moon_pkg",
@@ -161,6 +161,17 @@
       "recorded four-backend consumer completion"
     ]
   },
+  "publish_filter": {
+    "status": "passed",
+    "rejected_local_files": 10,
+    "commands": [
+      {
+        "command": "moon package --list",
+        "cwd": "<publish-filter-fixture>",
+        "exit_code": 0
+      }
+    ]
+  },
   "example_collection": {
     "status": "passed",
     "scope": "synthetic target-lesion software examples; not clinical validation",
@@ -302,7 +313,8 @@
     "package archive and synchronized tested README",
     "independent extracted-candidate consumer on four backends",
     "release candidate contracts: strict rc IDs, source/module/browser identity, runtime closure and exact checksum sets",
-    "candidate corruption rejection: altered/missing artifacts, recomputed cross-file mismatches, paths and incomplete consumer evidence"
+    "candidate corruption rejection: altered/missing artifacts, recomputed cross-file mismatches, paths and incomplete consumer evidence",
+    "publication filters: actual packaging excludes root/nested archives, local caches and development-only files"
   ],
   "scenario_summaries": {
     "nadir-boundary": {
@@ -358,7 +370,7 @@
     "missing_measurements": 0,
     "defaulted_measurements": 0
   },
-  "command_count": 286,
+  "command_count": 287,
   "commands": [
     {
       "command": "moon version --all",
@@ -1788,6 +1800,11 @@
     {
       "command": "moon run --target native .",
       "cwd": "<extracted-candidate-consumer>",
+      "exit_code": 0
+    },
+    {
+      "command": "moon package --list",
+      "cwd": "<publish-filter-fixture>",
       "exit_code": 0
     }
   ]
