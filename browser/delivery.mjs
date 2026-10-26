@@ -51,6 +51,7 @@ export function batchZip(batch) {
 
 export async function verifyArchive(evaluate, bytes) {
   const files = await readZip(bytes), groups = new Map();
+  if (files.some(file => file.name === "handoff.json")) throw new Error("这是完整交接包，请使用上方的“检查交接包”入口。");
   for (const file of files) {
     if (["index.json", "index.html"].includes(file.name)) continue;
     const at = file.name.lastIndexOf("/"), prefix = file.name.slice(0, at + 1), name = file.name.slice(at + 1);

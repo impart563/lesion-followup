@@ -55,6 +55,8 @@ reviewed as an independent batch, exported as native-compatible report ZIPs and
 checked again through the browser's bundle-integrity view. A separate human-review
 checklist retains viewing states and comments, with input-bound note files and
 independent HTML/Markdown explanations; core findings and categories stay intact.
+Complete handoff ZIPs carry both input versions, native reports and optional
+notes, with full report regeneration before explicit workspace restoration.
 
 ### Prepare and check inputs
 

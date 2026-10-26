@@ -2,7 +2,7 @@ import { createReviewNotes, updateReviewNotes, encodeReviewNotes, readReviewNote
   reviewProgress, REVIEW_KEY, REVIEW_LIMITS } from "./review-notes.mjs";
 import { escapeHtml as esc } from "./workbench.mjs";
 
-export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLanguage, getBusy, noticeText, download, notify }) {
+export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLanguage, getBusy, noticeText, download, notify, onChange = () => {} }) {
   const $ = id => document.getElementById(id);
   const signature = () => { const s = getSources(); return JSON.stringify([s.study_json, s.followup_csv]); };
   let record = null, binding = null, current = signature(), epoch = 0, busy = false, saved = false, lastError = "";
@@ -35,10 +35,15 @@ export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLangu
       $("review-notes-context").textContent = `${record.context.study_id} · 基线 ${record.context.baseline_date} · ${record.context.visit_count} 次随访`;
       $("review-notes-fingerprint").textContent = record.context.source_sha256;
     }
+    onChange();
   }
 
   function render() {
-    if (!record) { refresh(); return; }
+    if (!record) {
+      $("review-summary-note").value = ""; $("review-notes-items").replaceChildren();
+      for (const id of ["review-notes-counts", "review-notes-context", "review-notes-fingerprint"]) $(id).textContent = "";
+      refresh(); return;
+    }
     $("review-summary-note").value = record.summary_note;
     const filter = $("review-notes-filter").value;
     const items = record.items.filter(item => filter === "all" || item.status === filter);
@@ -112,5 +117,9 @@ export function mountReviewNotes({ getEvaluate, getSources, getQuality, getLangu
     download("target-review-notes." + (format === "html" ? "html" : "md"), renderReviewNotes(record, format, getLanguage()), format === "html" ? "text/html" : "text/markdown");
   });
   refresh();
-  return { refresh };
+  return { refresh, version: () => epoch, isBusy: () => busy,
+    hasCurrentRecord: () => !!active(),
+    snapshot: () => active() ? structuredClone(record) : null,
+    adopt(value) { lastError = ""; apply(value === null ? null : structuredClone(value), false); },
+  };
 }

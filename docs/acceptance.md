@@ -247,3 +247,35 @@ retained comments, all three hints and the one-viewed/two-pending counts. The
 workbench was visually checked at 781 × 797, and the independent explanation
 HTML at 1265 × 712. No mobile viewport or native print-dialog check is claimed.
 These checks establish software workflow and transport behavior only.
+
+## Complete handoff acceptance
+
+The unified suite runs `handoff_acceptance.py`. Four bilingual handoffs retain
+LF and Unicode/CRLF source strings; their 20 native report files match the
+independently generated CLI files byte for byte. Python independently checks
+the outer manifest and every leaf digest, writes DEFLATE and streamed ZIP
+fixtures, and verifies four exported report directories with the native CLI.
+Thirteen malformed archives cover missing, extra and changed files, unsupported
+schemas, invalid manifests, nested session/note mismatches, and complete valid
+reports from another input or language. Reordered JSON keys and ZIP entries
+remain accepted. Receiver tests cover explicit apply, immutable snapshots,
+concurrent inspection, source edits, file replacement and read failures.
+
+On 2026-10-26 the Windows in-app browser exercised actual file-chooser reception,
+preview without workspace replacement, explicit restoration of both source
+versions, language and one viewed note, and comparison after restoration
+(one measurement change and three affected visits). Actual exports with and
+without notes were selected again. The no-note handoff cleared the in-memory
+checklist and summary; restoring the older saved session and its local notes
+confirmed that reception had not overwritten the local note copy. Editing a
+note after inspection and selecting a replacement file withdrew the old load
+action. Tampered and valid-but-unrelated reports were rejected without changing
+the editor or notes. A Python DEFLATE ZIP with data descriptors passed in the
+actual browser as well.
+
+Python independently checked CRCs, manifest/leaf/session/note digests and exact
+source-pair preservation in both actual downloaded ZIPs. Their five report files
+were identical, and both extracted report directories passed native verification.
+The existing desktop layout was visually reviewed. No mobile viewport or native
+print-dialog check is claimed for this batch. CI covers transport and workflow
+contracts with synthetic data; these checks are not clinical validation.

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add complete review handoff ZIPs containing portable source sessions,
+  native-compatible current reports and optional input-bound human notes.
+- Add strict outer/nested integrity checks and regeneration of every report
+  file before displaying a derived handoff preview.
+- Add explicit whole-workspace restoration with stale-operation guards,
+  no-note clearing and preserved local draft/note copies.
+
 - Add a manual review checklist preserving core hints while tracking human
   viewing states, per-item comments and a round-level summary.
 - Add explicit local and portable note persistence with strict schemas,

@@ -3,13 +3,14 @@ import { examples } from "./examples.mjs";
 import { createBundle, reviewBatch, batchZip, verifyArchive } from "./delivery.mjs";
 import { writeZip, ZIP_LIMITS } from "./archive.mjs";
 import { mountReviewNotes } from "./review-notes-ui.mjs";
+import { mountHandoff } from "./handoff-ui.mjs";
 
 const $ = id => document.getElementById(id);
 const state = { evaluate: null, model: null, quality: null, report: null, revision: 0, saved: null, busy: false, baseline: null, comparison: null, sources: { study_json: "", followup_csv: "" } };
 const inputNames = ["随访编号", "日期", "采集标识", "病灶编号", "观察状态", "直径 mm", "读片者说明"];
 const stateNames = { measured: "已测量", absent: "已消失", too_small: "过小，无法可靠测量", missing: "未测量", not_evaluable: "无法评价" };
 const urls = [];
-let reviewNotesController = null;
+let reviewNotesController = null, handoffController = null;
 let batchResult = null, batchToken = 0, batchRunning = false, archiveToken = 0, archiveRunning = false;
 const printShadow = $("print-render").attachShadow({ mode: "open" });
 printShadow.addEventListener("click", event => {
@@ -549,7 +550,21 @@ bind("verify-archive", async () => {
 
 reviewNotesController = mountReviewNotes({ getEvaluate: () => state.evaluate, getSources: source,
   getQuality: () => state.quality, getLanguage: () => $("language").value, getBusy: () => state.busy,
-  noticeText, download, notify: message });
+  noticeText, download, notify: message, onChange: () => handoffController?.refresh() });
+
+handoffController = mountHandoff({ getEvaluate: () => state.evaluate,
+  getSession: () => ({ before: state.baseline, current: source(), language: $("language").value }),
+  getQuality: () => state.quality, getNotes: () => reviewNotesController,
+  getRevision: () => JSON.stringify([state.revision, reviewNotesController.version()]),
+  getBusy: () => state.busy || reviewNotesController.isBusy(), download, notify: message,
+  apply: ({ session, notes }) => {
+    $("language").value = session.language;
+    replaceSources(session.current, session.before); state.saved = null;
+    reviewNotesController.adopt(notes);
+    $("input-status").textContent = "来自已核查的完整交接包。";
+    showView(notes ? "notes" : "records");
+  },
+});
 
 window.addEventListener("pagehide", () => urls.forEach(url => URL.revokeObjectURL(url)));
 

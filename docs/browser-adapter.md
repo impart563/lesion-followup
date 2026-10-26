@@ -232,6 +232,14 @@ separate strict JSON and HTML/Markdown contracts are described in
 [human review notes](review-notes.md). Existing report, bundle, draft and session
 formats remain unchanged.
 
+## Complete handoff boundary
+
+The handoff workbench composes existing session, note and bundle contracts;
+it adds no clinical rule or adapter action. Reception regenerates all five
+native report files and validates optional notes against the current core
+hints before any workspace replacement. See [the handoff format](handoff.md)
+for the outer JSON/ZIP layout and explicit restoration behavior.
+
 ## Verification
 
 ```sh
