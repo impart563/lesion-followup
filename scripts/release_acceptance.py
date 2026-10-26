@@ -39,7 +39,11 @@ def verify_release_contract(package,consumer,paths,fingerprint,count,passed):
         stem='lesion-followup-'+version+'-rc.2';commit='1'*40
         source=folder/(stem+'-source.zip')
         with ZipFile(source,'w',ZIP_DEFLATED) as archive:
-            for path in paths: archive.writestr(path.relative_to(ROOT).as_posix(),path.read_bytes())
+            for path in paths:
+                # Git text archives use LF even when a Windows working tree uses CRLF.
+                content=path.read_bytes()
+                if path.suffix.lower() not in {'.zip','.png','.jpg','.jpeg','.webp'}: content=content.replace(b'\r\n',b'\n')
+                archive.writestr(path.relative_to(ROOT).as_posix(),content)
             archive.comment=commit.encode('ascii')
         (folder/package.name).write_bytes(package.read_bytes())
         browser=folder/(stem+'-browser.zip')

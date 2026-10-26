@@ -36,7 +36,7 @@ def zip_files(content):
 
 def normalized(name, content):
     text_suffixes = {'.mbt','.mbti','.md','.mjs','.js','.css','.json','.html','.svg','.csv','.py','.yml','.toml'}
-    return content.replace(b'\r\n',b'\n') if Path(name).suffix in text_suffixes or Path(name).name in {'moon.mod','moon.pkg','.gitignore','.gitattributes'} else content
+    return content.replace(b'\r\n',b'\n') if Path(name).suffix in text_suffixes or Path(name).name in {'moon.mod','moon.pkg','LICENSE','.gitignore','.gitattributes'} else content
 
 def source_fingerprint(files):
     checksum = hashlib.sha256(); count = 0
