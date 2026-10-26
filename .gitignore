@@ -4,3 +4,4 @@ target/
 .repos/
 *.zip
 __pycache__/
+AGENTS.md

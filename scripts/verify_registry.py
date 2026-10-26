@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 from distribution import ROOT, module_version
+from evidence_paths import public_record
 
 
 def main():
@@ -57,6 +58,7 @@ def main():
                   'workspace': 'disabled by MOON_WORK=off; no moon.work copied', 'backends': outputs,
                   'registry_metadata': metadata, 'dependency_tree': tree, 'commands': commands,
                   'scope': 'synthetic software integration; not clinical validation'}
+        record = public_record(record, ROOT, aliases=[(consumer, '<registry-consumer>')])
         options.record.parent.mkdir(parents=True, exist_ok=True)
         options.record.write_text(json.dumps(record, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print('Registry installation verified: ' + dependency + ' on four backends')

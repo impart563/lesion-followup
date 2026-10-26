@@ -255,7 +255,7 @@ post-PD NE, missing values, a technique change, exact precision rejection,
 numeric JSON diameter rejection, physical multiline locations and Unicode notes.
 The MoonBit adapter tests run on all four library targets as well.
 
-On 2026-10-25 the packaged smoke page passed all five checks in the Codex in-app
+On 2026-10-25 the packaged smoke page passed all five checks in a desktop
 browser, reporting Chromium 155.0.0.0 on Windows. It loaded the local compiled
 module, produced PR→PR→PR→PD from the synthetic multi-target template, rejected
 extra precision with the diameter field location, preserved successful NE with

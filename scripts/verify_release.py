@@ -77,7 +77,7 @@ def verify_release(directory):
     module,_=archives['impart563-lesion-followup-'+version+'.zip']
     if not {'moon.mod','LICENSE','README.mbt.md','moon.pkg','pkg.generated.mbti'}.issubset(module): raise ValueError('module files missing')
     for name,content in module.items():
-        if any(part in {'_build','.mooncakes','.repos','.git','__pycache__'} for part in PurePosixPath(name).parts) or name.startswith('examples/downstream-consumer/'):
+        if any(part in {'_build','.mooncakes','.repos','.git','__pycache__','AGENTS.md'} for part in PurePosixPath(name).parts) or name.startswith('examples/downstream-consumer/') or name == 'docs/acceptance-results.json':
             raise ValueError('local files leaked into module')
         if name not in source or normalized(name,content)!=normalized(name,source[name]): raise ValueError('module/source content differs: '+name)
     module_text=module['moon.mod'].decode('utf-8')

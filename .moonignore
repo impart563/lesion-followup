@@ -8,3 +8,5 @@ target/
 __pycache__/
 *.zip
 *.bundle
+AGENTS.md
+docs/acceptance-results.json

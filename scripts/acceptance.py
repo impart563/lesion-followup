@@ -29,6 +29,7 @@ from handoff_acceptance import verify_handoff
 from visit_editing_acceptance import verify_visit_editing
 from observation_acceptance import verify_observations
 from release_acceptance import verify_release_contract, verify_publish_filter
+from evidence_paths import record_argument, public_record, verify_record_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = ("markdown", "json", "csv", "svg", "html")
@@ -50,7 +51,7 @@ def source_paths():
     excluded = {".git", "_build", "target", ".mooncakes", ".repos", "__pycache__"}
     for directory, directories, files in os.walk(str(ROOT)):
         directories[:] = [name for name in directories if name not in excluded]
-        paths.extend(Path(directory) / name for name in files)
+        paths.extend(Path(directory) / name for name in files if name != "AGENTS.md")
     return sorted(paths, key=lambda path: path.relative_to(ROOT).as_posix())
 
 
@@ -204,11 +205,7 @@ def main():
         env = environment.copy()
         env["MOON_WORK"] = str(workspace) if workspace else "off"
         result = subprocess.run([moon] + list(args), cwd=str(cwd), env=env, text=True, encoding="utf-8", errors="replace", capture_output=True, timeout=180)
-        display_args = []
-        for argument in args:
-            if argument.startswith(tempfile.gettempdir() + os.sep):
-                argument = "<temporary>/" + Path(argument).name
-            display_args.append(argument)
+        display_args = [record_argument(argument, ROOT) for argument in args]
         commands.append({"command": "moon " + " ".join(display_args), "cwd": str(Path(cwd).relative_to(ROOT)).replace("\\", "/"), "exit_code": result.returncode})
         if result.returncode != expected:
             raise RuntimeError("moon " + " ".join(args) + "\n" + result.stdout + "\n" + result.stderr)
@@ -221,6 +218,8 @@ def main():
         checks.append(name)
         print("PASS " + name, flush=True)
 
+    verify_record_paths()
+    passed("portable acceptance metadata excludes checkout, home and temporary paths")
     version = run(["version", "--all"]).stdout.strip()
     run(["fmt", "--check"])
     run(["check", "--target", "all", "--deny-warn"])
@@ -529,6 +528,7 @@ def main():
         "command_count": len(commands),
         "commands": commands,
     }
+    record = public_record(record, ROOT)
     if options.record:
         destination = options.record if options.record.is_absolute() else ROOT / options.record
         destination.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

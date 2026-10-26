@@ -134,7 +134,7 @@ archive, clean-directory consumption and registry-installation meanings.
 ## Input and report usability preview
 
 On 2026-10-24, the saved Chinese example was opened through localhost in the
-Codex in-app browser. At a 1265 × 712 viewport, the Chinese headings, target-only
+desktop Chromium browser. At a 1265 × 712 viewport, the Chinese headings, target-only
 scope, category cards, sum chart and ledger were readable. Selecting the PD card
 navigated to `#visit-3`, showing week-8's 25.0 mm sum evidence, with T1 at 15.0 mm
 and N1 at 10.0 mm. Scrolling showed separate T1 longest-diameter and N1 short-axis
@@ -151,13 +151,13 @@ retain the existing report's visit navigation and target-only scope.
 
 ## Offline workbench review
 
-On 2026-10-25 the workbench was exercised in the Codex in-app browser
+On 2026-10-25 the workbench was exercised in a desktop Chromium browser
 (Chromium 155.0.0.0, Windows, default desktop viewport). Actual file chooser
 imports loaded the saved study JSON and CSV. Editing week-4 T1 to 10.01 mm
 located the precision error and disabled replay; correcting it to 9.0 mm produced
 PR, PR, PD, NE. The generated CSV and JSON were downloaded and imported again;
-the input fingerprint matched exactly. The redesigned navigation, collapsed
-baseline details, editable observation table, natural Chinese diagnostics,
+the input fingerprint matched exactly. Navigation, collapsed
+baseline details, editable observation table, Chinese diagnostics,
 report distribution and core-generated sum chart were inspected visually.
 
 Explicit draft save, refresh, manual restore, unsupported-version rejection
@@ -167,8 +167,7 @@ visit showed two observations while the full report retained all 36 visits.
 Both print layouts were previewed inside the page. Print content uses a scoped
 Shadow DOM; local anchor navigation is handled within that same scope.
 
-The in-app browser did not expose a capturable native print dialog, so pagination
-was checked independently using the official portable WeasyPrint 70.0 renderer,
+Pagination was checked independently using the official portable WeasyPrint 70.0 renderer,
 downloaded from its GitHub release with SHA-256
 `ab1151f210b4e6bb7aa7a79e91a67e8ddb760094c107bfda55241b6aaefe7d53`.
 Small summary/full and long summary/full documents were rendered and visually

@@ -15,7 +15,7 @@ def verify_publish_filter(moon,environment,passed):
         (folder/'README.md').write_text('Synthetic publication-filter fixture.\n',encoding='utf-8')
         (folder/'LICENSE').write_bytes((ROOT/'LICENSE').read_bytes())
         (folder/'.moonignore').write_bytes((ROOT/'.moonignore').read_bytes())
-        forbidden=['old-source.zip','nested/backup.zip','backup.bundle','__pycache__/local.pyc','nested/__pycache__/local.pyc','scripts/private.txt','.github/ci.yml','.repos/foreign.txt','target/cache.txt','nested/_build/cache.txt']
+        forbidden=['old-source.zip','nested/backup.zip','backup.bundle','__pycache__/local.pyc','nested/__pycache__/local.pyc','scripts/private.txt','.github/ci.yml','.repos/foreign.txt','target/cache.txt','nested/_build/cache.txt','AGENTS.md','docs/acceptance-results.json']
         for name in forbidden:
             path=folder/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text('synthetic local artifact',encoding='utf-8')
         result=subprocess.run([moon,'package','--list'],cwd=str(folder),env=environment,capture_output=True,text=True,encoding='utf-8',timeout=180)
